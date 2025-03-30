@@ -14,7 +14,7 @@ struct HomeScreen: View {
         NavigationView{
             ZStack {
                 // Background Color
-                Color.white
+                Color.pink
                     .edgesIgnoringSafeArea(.all) // Color the entire screen
                 
                 // Content on top of the background
