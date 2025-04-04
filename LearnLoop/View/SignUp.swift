@@ -1,12 +1,13 @@
 //
-//  LogIn.swift
+//  Untitled.swift
 //  LearnLoop
 //
 //  Created by Klarissa Navarro on 3/30/25.
 //
+
 import SwiftUI
 
-struct LogIn: View {
+struct SignUp: View {
     @State private var email: String = ""
     @State private var password: String = ""
     
@@ -18,7 +19,7 @@ struct LogIn: View {
                     .edgesIgnoringSafeArea(.all) // Color the entire screen
                 
                 VStack{
-                    Text("Log In").font(.largeTitle)
+                    Text("Sign Up").font(.largeTitle)
                         .fontWeight(.black)
                         .foregroundColor(Color.white)
                     
@@ -53,9 +54,9 @@ struct LogIn: View {
                         // Sin Up button
                         Button(action:{
                             // need to change the action!!!!
-                            print("LOG IN Button tapped!")
+                            print("SIGN UP Button tapped!")
                         }) {
-                            Text("Log In")
+                            Text("Sign Up")
                                 .font(.body)
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
@@ -76,10 +77,10 @@ struct LogIn: View {
                     
                     // Navigate to LogIn
                     HStack{
-                        Text("Need an account?")
+                        Text("Have an account?")
                             .foregroundColor(.white)
-                        NavigationLink(destination: SignUp()) {
-                            Text("Sign Up")
+                        NavigationLink(destination: LogIn()) {
+                            Text("Log In")
                                 .foregroundColor(.white)
                                 .underline()
                         }
@@ -94,9 +95,8 @@ struct LogIn: View {
         }.navigationBarBackButtonHidden(true)
     }
     
-    
 }
 
 #Preview {
-    LogIn()
+    SignUp()
 }
