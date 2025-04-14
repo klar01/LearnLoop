@@ -106,7 +106,6 @@ struct HomeScreen: View {
                 
             }
             
-                
         }
         .cornerRadius(10)
         .background(Color(red: 58/255, green: 58/255, blue: 60/255))
@@ -121,7 +120,7 @@ struct HomeScreen: View {
         }
     }
     
-    // flashcard sets
+    // flashcard sets 
     var flashcardSetsList: some View{
         ScrollView {
             //Flashcard Sets --- Needs to be edited!!!
@@ -134,7 +133,7 @@ struct HomeScreen: View {
                 
                 // Display all flashcard sets
                 ForEach(viewModel.flashcardSet.indices, id: \.self) { index in
-                    NavigationLink(destination: StudySet(viewModel: viewModel, flashCardSet: viewModel.flashcardSet[index])) {
+                    NavigationLink(destination: StudySet(viewModel: viewModel, flashCardSet: viewModel.flashcardSet[index], indexOfSet: index)) {
                         
                         // displays the set name and its progress mastery bar 
                         IndividualSet(viewModel: viewModel, title: viewModel.flashcardSet[index].title, index: index)

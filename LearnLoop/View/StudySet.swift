@@ -8,8 +8,13 @@
 import SwiftUI
 
 struct StudySet:  View{
+    // values are passed from the HomeScreen 
     @ObservedObject var viewModel: FlashcardSetViewModel
     var flashCardSet: FlashCardSet
+    var indexOfSet: Int
+    
+    // Get the presentation mode to dismiss the view when the user is done
+    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
     var body: some View{
         NavigationStack{
@@ -27,16 +32,33 @@ struct StudySet:  View{
                             Image(systemName: "arrow.left")
                                 .padding()
                                 .foregroundColor(.black)
-                                
                                 .fontWeight(.bold)
                                 .cornerRadius(10)
                                 .background(Color(red: 218/255, green: 143/255, blue: 255))
-                                
                         }
                         .cornerRadius(10)
                         .padding(.leading, 20) // Add padding to the left side to create spacing from the edge
-                        
+
                         Spacer()
+                        
+                        // removes the flashcard set
+                        Button(action: {
+                            // delete set
+                            //viewModel.removeFlashcardSet(title: flashCardSet.title)
+                            viewModel.removeFlashcardSetByIndex(index: indexOfSet)
+                            
+                            // Dismiss the current view and go back to HomeScreen
+                            presentationMode.wrappedValue.dismiss()
+                        }){
+                            Image(systemName: "trash")
+                                .padding()
+                                .fontWeight(.bold)
+                                .foregroundColor(.black)
+                                .background(Color(red: 218/255, green: 143/255, blue: 255))
+                                .cornerRadius(10)
+                        }
+                        .padding(.trailing, 20)
+
                     }
                     
                     Spacer()
@@ -48,7 +70,7 @@ struct StudySet:  View{
                     
                     // Button Container
                     VStack (spacing: 20){
-                        NavigationLink(destination: StudyMode(viewModel: viewModel, flashCardSet: flashCardSet)) {
+                        NavigationLink(destination: StudyMode(viewModel: viewModel, flashCardSet: flashCardSet, indexOfSet: indexOfSet)) {
                             Text("Study Set")
                                 .padding()
                                 .foregroundColor(.black)
@@ -103,7 +125,7 @@ struct StudySetPreview: PreviewProvider {
         ]
         
         // Return the StudySet view with the viewModel and sample flashCardSet
-        return StudySet(viewModel: viewModel, flashCardSet: viewModel.flashcardSet[0])
+        return StudySet(viewModel: viewModel, flashCardSet: viewModel.flashcardSet[0], indexOfSet: 0)
     }
 }
 

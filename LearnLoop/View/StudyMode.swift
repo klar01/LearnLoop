@@ -7,12 +7,14 @@
 
 // User begins studying the entire flashcard set
 // card animation
-// swiping gestures
+// swiping gestures 
 import SwiftUI
 
 struct StudyMode: View{
+    // values passed from StudySet
     @ObservedObject var viewModel: FlashcardSetViewModel
-    var flashCardSet: FlashCardSet
+    @State var flashCardSet: FlashCardSet
+    var indexOfSet: Int
     
     var body: some View{
         ZStack{
@@ -22,45 +24,71 @@ struct StudyMode: View{
             
             VStack{
                 VStack{
-                    Text("title of set").foregroundColor(.white)
+                    Text("Currently studying: \(flashCardSet.title)")
+                        .foregroundColor(.white)
+                        .fontWeight(.bold)
+                        .font(.title3)
+                        .multilineTextAlignment(.center)
                 }
+                
+                // Progress Bar -- the number of cards left to go through in set
+                VStack{
+                    Text("\(viewModel.flashcardSet[indexOfSet].cardNumber) / \(flashCardSet.flashcards.count)").foregroundColor(.white).padding()
+                    
+                    //progress bar
+                    ProgressView(value: viewModel.progessOfCardsStudied(for: indexOfSet), total: 1.0)
+                        .progressViewStyle(LinearProgressViewStyle(tint: .yellow))
+                        .frame(width: 250)
+                  
+                }
+                
                 
                 Spacer()
 
-                //Front Card
-                VStack{
-                    Text("sdhb cxhjsd fd bjh b cxhjsd fd bjhsbd ssdh bd hb cxhjsd fd bjhsbd ssdhssdhs hb cxhjsd fd bjhsbd ssdh hb cxhjsd fd bjhsbd ss b cxhjsd fd bjhsbd ssdh bd hb cxhjsd fd bjhsbd ssdhssdhs hb cxhjsd")
-                        .frame(minHeight: 250)
-                        .padding()
-                        .background(Color.white)
-                        .frame(maxWidth: UIScreen.main.bounds.width - 40)
-                        .fixedSize(horizontal: false, vertical: true)  // Allow vertical expansion based on content
+                //Display all cards -- all stacked on top of each other
+                ZStack {
                     
+                    VStack{
+                        Text("Great job!").padding().foregroundColor(.white).fontWeight(.bold)
+                        
+                        // Navigate back to Progress result screen
+                        NavigationLink(destination: ProgressResults(viewModel: viewModel, flashCardSet: flashCardSet, indexOfSet: indexOfSet)) {
+                            Text("View Results")
+                                .padding()
+                                .foregroundColor(.black)
+                                .fontWeight(.bold)
+                                .background(Color(red: 218/255, green: 143/255, blue: 255))
+                        }
+                        .cornerRadius(10)
+                        .frame(maxWidth: 200)
+                        
+                    }
                     
+                    ForEach (flashCardSet.flashcards.indices, id: \.self) { index in
+                        CardView(viewModel: viewModel, flashCardSet: flashCardSet, indexOfSet: indexOfSet)
+                    }
+                   
                 }
-                .background(.white)
-                .cornerRadius(10)
-                .frame(maxWidth: UIScreen.main.bounds.width - 40)
+                
             
                 Spacer()
 
-                
-                Button("Finish Studying"){
-                    //some action
-                    
+                // Navigate back to HomeScreen
+                NavigationLink(destination: HomeScreen(viewModel: viewModel)) {
+                    Text("Finish Studying")
+                        .padding()
+                        .foregroundColor(.black)
+                        .fontWeight(.bold)
+                        .background(Color(red: 218/255, green: 143/255, blue: 255))
                 }
-                .padding()
-                .foregroundColor(.black)
-                .fontWeight(.bold)
-                .frame(maxWidth: 200)
                 .cornerRadius(10)
-                .background(Color(red: 218/255, green: 143/255, blue: 255))
-                
+                .frame(maxWidth: 200)
                 
             }.padding()
             
-        }
+        }.navigationBarBackButtonHidden(true)
     }
+    
 }
 
 #Preview {
@@ -68,9 +96,14 @@ struct StudyMode: View{
     let viewModel = FlashcardSetViewModel()
     let sampleSet = FlashCardSet(title: "Sample Set", flashcards: [
         Flashcard(q: "What is Swift?", a: "A programming language"),
-        Flashcard(q: "What is 2 + 2?", a: "4")
+        Flashcard(q: "What is 2 + 2?", a: "4"),
+        Flashcard(q: "color of sky?", a: "blue"),
+        Flashcard(q: "my name?", a: "some name"),
+        Flashcard(q: "What is 2 + 2?", a: "4"),
+        Flashcard(q: "color of grass?", a: "green"),
+        Flashcard(q: "u like jazz?", a: "no"),
     ])
     
     // Return the StudyMode view with both viewModel and sampleSet
-    StudyMode(viewModel: viewModel, flashCardSet: sampleSet)
+    StudyMode(viewModel: viewModel, flashCardSet: sampleSet, indexOfSet: 0)
 }

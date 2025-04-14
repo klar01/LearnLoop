@@ -24,7 +24,7 @@ struct IndividualSet: View{
                 .foregroundColor(.black)
             
             //progress bar
-            ProgressView(value: viewModel.progress(for: index), total: 1.0)
+            ProgressView(value: viewModel.progressForMastery(for: index), total: 1.0)
                 .progressViewStyle(LinearProgressViewStyle(tint: .yellow))
                 .frame(width: 250)
                 .padding()

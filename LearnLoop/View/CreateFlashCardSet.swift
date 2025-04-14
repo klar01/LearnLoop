@@ -33,13 +33,10 @@ struct CreateFlashCardSet: View {
                 .edgesIgnoringSafeArea(.all) // Color the entire screen
             
             VStack{
-                // Naming Flashcard Set
-                namingTitle
-                
-                // Flashcards set
-                flashcardList
-                
-                
+                returnHomeScreen
+                namingTitle     // Naming Flashcard Set
+                flashcardList   // Flashcards set
+         
                 // Show error message if the flashcard set isn't valid
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
@@ -51,13 +48,29 @@ struct CreateFlashCardSet: View {
                 createFlashcardSetButton
                 
             }.padding()
-            
            
         }.navigationBarBackButtonHidden(true)
         
     }
     
     // MARK: - SUBVIEWS
+    
+    var returnHomeScreen: some View{
+        HStack{
+            NavigationLink(destination: HomeScreen(viewModel: viewModel)) {
+                Image(systemName: "arrow.left")
+                    .padding()
+                    .foregroundColor(.black)
+                    .fontWeight(.bold)
+                    .cornerRadius(10)
+                    .background(Color(red: 218/255, green: 143/255, blue: 255))
+            }
+            .cornerRadius(10)
+            Spacer()
+ 
+        }.padding(.bottom, 5)
+    
+    }
     
     var namingTitle: some View {
         HStack{
@@ -78,109 +91,124 @@ struct CreateFlashCardSet: View {
     }
     
     var flashcardList: some View {
-        ScrollView {
-            // individual cards
-            VStack{
+        ScrollViewReader { proxy in
+            // created list instead of ScrollView b/c it will be easier to remove the card if you swipe
+            List {
                 ForEach(flashcards.indices, id: \.self) { index in
-                    // Input Fields for Question and Answer
-                    VStack {
-                        
-                        // Question
-                        VStack{
-                            // prompt
-                            HStack{
+                    Section {
+                        VStack(alignment: .leading, spacing: 10) {
+                            // Question
+                            VStack(alignment: .leading) {
                                 Text("Question")
                                     .foregroundColor(.gray)
                                     .font(.body)
-                                Spacer()
+                                TextEditor(text: $flashcards[index].question)
+                                    .frame(minHeight: 30)
+                                    .background(Color.white)
+                                    .cornerRadius(5)
+                                    .fixedSize(horizontal: false, vertical: true)  // Allow vertical expansion based on content
                             }
                             
-                            // user input
-                            TextEditor(text: $flashcards[index].question)
-                                .frame(minHeight: 30)
-                                .padding(0)
-                                .background(Color.white)
-                                .fixedSize(horizontal: false, vertical: true)  // Allow vertical expansion based on content
-                            
-                            // Bottom border for Question TextField
+                            // border between question and answer
                             Rectangle()
                                 .frame(height: 1)
                                 .foregroundColor(.gray)
-                        }
-                        
-                        // Answer
-                        VStack{
-                            //prompt
-                            HStack{
+                            
+                            // Answer
+                            VStack(alignment: .leading) {
                                 Text("Answer")
                                     .foregroundColor(.gray)
                                     .font(.body)
-                                Spacer()
+                                TextEditor(text: $flashcards[index].answer)
+                                    .frame(minHeight: 30)
+                                    .background(Color.white)
+                                    .cornerRadius(5)
+                                    .fixedSize(horizontal: false, vertical: true)  // Allow vertical expansion based on content
                             }
-                            
-                            // user input
-                            TextEditor(text: $flashcards[index].answer)
-                                .frame(minHeight: 30)
-                                .padding(0)
-                                .background(Color.white)
-                                .fixedSize(horizontal: false, vertical: true)  // Allow vertical expansion based on content
-                            
-                            
-                            // Bottom border for Question TextField
-                            Rectangle()
-                                .frame(height: 1)
-                                .foregroundColor(.gray)
                         }
-                       
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    
-                    // Divider between cards
-                    Rectangle()
-                        .frame(height: 3)
-                        .frame(width: 100)
-                        .foregroundColor(.white)
                         .padding()
+                        .background(Color.white)
+                        .cornerRadius(10)
+                        .padding(.vertical, 10) // adds spacing between cards
+                        
+                        // to remove card
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                flashcards.remove(at: index)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        
+                        // Divider between cards
+                        Rectangle()
+                            .frame(height: 3)
+                            .frame(width: 100)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .center)
+                        
+                    }
+                    .listRowInsets(EdgeInsets()) //remove default padding (ideal width of card)
+                    .listRowBackground(Color.clear) // clear backgroundt to show the spacing between cards
+                    .id(index) // Assign an id for scroll action
+                }
+                
+                
+                // Add Card Button
+                Section {
+                    Button(action: {
+                        flashcards.append(Flashcard(q: "", a: ""))
+                        
+                        // Scroll to the newly added card
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {  // time to allow for the new card to be added
+                            proxy.scrollTo(flashcards.count - 1, anchor: .bottom) // Scroll for newly added card to be seen
+                        }
+                    }) {
+                        HStack {
+                            Text("+ Add Flashcard")
+                        }
+                        .foregroundColor(.gray)
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .center) // center the text/icon
+                        .padding(.vertical, 10) // creates spacings between cards
+                    }
+                    .listRowBackground(Color.clear) // transparent background for the list row
+                    .listRowInsets(EdgeInsets())    // removes unwanted padding
                 }
                 
             }
-            
-            // Button to simulate adding a new flashcard
-            Button("Add Flashcard") {
-                //viewModel.addFlashcard() // Add a new flashcard
-                let newCard = Flashcard(q: question, a: answer)
-                flashcards.append(newCard)
-                
-            }
-            .padding()
-            .cornerRadius(10)
-            .foregroundColor(.black)
-            .fontWeight(.bold)
-            .background(Color(red: 218/255, green: 143/255, blue: 255))
-            
-        }.padding(.top, 20)
+            .listStyle(PlainListStyle())
+        }
+        
     }
     
     var createFlashcardSetButton: some View{
-        Button(action:{
-            if(validateFlashcards()){
-                // Create a new FlashCardSet and add it to the viewModel
-                let newSet = FlashCardSet(title: title, flashcards: flashcards)
-                viewModel.addFlashcardSet(newSet)
+        VStack{
+            // Divider to separate the content
+            Divider().frame(height: 2)  // Adjust the thickness of the divider
+                .background(Color.gray)  // Change the divider color to red
+   
+            
+            Button(action:{
+                if(validateFlashcards()){
+                    // Create a new FlashCardSet and add it to the viewModel
+                    let newSet = FlashCardSet(title: title, flashcards: flashcards)
+                    viewModel.addFlashcardSet(newSet)
+                    
+                    // Dismiss the current view and go back to HomeScreen
+                    presentationMode.wrappedValue.dismiss()
+                }
                 
-                // Dismiss the current view and go back to HomeScreen
-                presentationMode.wrappedValue.dismiss()
-            }
-            
-            
-        }){
-            Text("Create Set").padding()
-                .foregroundColor(.black)
-                .fontWeight(.bold)
-                .background(Color(red: 218/255, green: 143/255, blue: 255))
-        }.cornerRadius(10)
+            }){
+                Text("Create Set").padding()
+                    .foregroundColor(.black)
+                    .fontWeight(.bold)
+                    .background(Color(red: 218/255, green: 143/255, blue: 255))
+            }.cornerRadius(10)
+
+        }
+        
     }
     
     
