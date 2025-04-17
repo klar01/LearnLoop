@@ -61,11 +61,13 @@ struct CardView: View{
         switch width {
         // swipe to LEFT if card is UNMASTERED
         case -500...(-150):
-            //assign card as UNMASTERED
-            viewModel.unmasteredCard(indexOfSet: indexOfSet)
+            viewModel.unmasteredCard(indexOfSet: indexOfSet) //assign card as UNMASTERED
             
-            // get the next card set
-            viewModel.nextCardInSet(indexOfSet: indexOfSet)
+            // get the next card set & delay content update for smoother transitions between swiping cards
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                viewModel.nextCardInSet(indexOfSet: indexOfSet)
+            }
+            
             offset = CGSize(width: -500, height: 0)
             print("NOT mastered")
             
@@ -74,8 +76,11 @@ struct CardView: View{
             //assign card as MASTERED
             viewModel.masteredCard(indexOfSet: indexOfSet)
             
-            // get the next card set
-            viewModel.nextCardInSet(indexOfSet: indexOfSet)
+            // get the next card set & delay content update for smoother transitions between swiping cards
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                viewModel.nextCardInSet(indexOfSet: indexOfSet)
+            }
+            
             print("MASTERED card")
             offset = CGSize(width: 500, height: 0)
         default:
