@@ -127,7 +127,46 @@ class FlashcardSetViewModel: ObservableObject {
         
     }
     
-    // load flashcard set
-    
+    // editing the flashcard set -- add/remove/edit cards and edit title
+    func updateFlashcardSet(at index: Int, newTitle: String, newFlashcards: [Flashcard]) {
+        guard index >= 0 && index < flashcardSet.count else { return }
+        
+        var updatedFlashcards: [Flashcard] = []
+        let oldFlashcards = flashcardSet[index].flashcards // orginal set
+        
+        // loop through each card in the edited set
+        for newCard in newFlashcards {
+            
+            // check if the new card has exist in the orginal set
+            if let matchingOldCard = oldFlashcards.first(where: { $0.id == newCard.id }) {
+                // check if content was completely changed (i.e. user rewrote question AND answer instead of deleting card)
+                if matchingOldCard.question != newCard.question && matchingOldCard.answer != newCard.answer {
+                    // treat as a "new card" – reset mastered status
+                    var rewrittenCard = newCard
+                    rewrittenCard.isMastered = false
+                    updatedFlashcards.append(rewrittenCard)
+                                    
+                    print(" Completely rewritten card (reset mastery) --> Q: \(rewrittenCard.question) && A: \(rewrittenCard.answer) && (isMastered: \(rewrittenCard.isMastered))")
+                    
+                } else {
+                    // retain mastery state
+                    var preservedCard = newCard
+                    preservedCard.isMastered = matchingOldCard.isMastered
+                    updatedFlashcards.append(preservedCard)
+                    print("Preserved card --> Q: \(preservedCard.question) && A: \(preservedCard.answer) && (isMastered: \(preservedCard.isMastered))")
+                }
+               
+            } else {
+                // New card - add it
+                updatedFlashcards.append(newCard)
+                print("+ New card --> Q: \(newCard.question) && A: \(newCard.answer) && (isMastered: \(newCard.isMastered))")
+            }
+        }
+        
+        // Assign title and flashcards back to the model
+        flashcardSet[index].title = newTitle
+        flashcardSet[index].flashcards = updatedFlashcards
+       
+    }
     
 }

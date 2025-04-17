@@ -10,6 +10,7 @@ import SwiftUI
 struct ProgressResults: View{
     @ObservedObject var viewModel: FlashcardSetViewModel
     @State var flashCardSet: FlashCardSet
+    
     var indexOfSet: Int
     var clickMasteredButton: Bool = false
     var clickLearningButton: Bool = false
@@ -69,7 +70,7 @@ struct ProgressResults: View{
                         // Visual Progress -- show total number of questions correct/wrong and circle progress bar
                         visualProgress
                         
-                        // shows which questions are right/wrong
+                        // shows which questions are right/wrong (i.e., displays the list of cards in Leraning or Mastered)
                         displayCards
                         
                     }
@@ -155,6 +156,7 @@ struct ProgressResults: View{
         .shadow(color: .gray.opacity(0.5), radius: 10, x: 0, y: 5) // Add shadow to "pop" the container forward
     }
     
+    // displays the list of cards in Leraning or Mastered
     var displayCards: some View {
         VStack{
             // navigation

@@ -11,8 +11,6 @@ struct FlashCardSet{
     var title: String
     var flashcards: [Flashcard]
     var cardNumber = 0
-    var masteredCardsArray: [Flashcard]
-    var unmasteredCardsArray: [Flashcard]
     
     // computed property
     var unMastered: Int{
@@ -24,6 +22,16 @@ struct FlashCardSet{
         return flashcards.filter({ $0.isMastered }).count // NOTE: '$0' is shorthand syntax to refer to the current item
     }
     
+    // NOTE: Replaced manual arrays w/computed property the  mastered/unmastered away to ensure the lists are accurate and in sync with the main flashcards array
+    var masteredCardsArray: [Flashcard] {
+        flashcards.filter { $0.isMastered }
+    }
+
+    var unmasteredCardsArray: [Flashcard] {
+        flashcards.filter { !$0.isMastered }
+    }
+    
+    // total cards in flashcard set
     var total: Int {
         return flashcards.count
     }
@@ -31,8 +39,6 @@ struct FlashCardSet{
     init(title: String, flashcards: [Flashcard]) {
         self.title = title
         self.flashcards = flashcards
-        self.unmasteredCardsArray = []
-        self.masteredCardsArray = []
     }
     
     func getCurrentQuestion() -> String? {
@@ -68,20 +74,17 @@ struct FlashCardSet{
     
     // mark the card as mastered if it has a vaild index
     mutating func markCardAsMastered (at index: Int){
-        if(index >= 0 && index < flashcards.count){
+        if index >= 0 && index < flashcards.count {
             flashcards[index].isMastered = true
-            masteredCardsArray.append(flashcards[index]) // add card to mastered card array
         }
     }
-    
     
     // mark the card as unmastered if it has a vaild index
     mutating func markCardAsUnmastered (at index: Int){
-        if(index >= 0 && index < flashcards.count){
-            unmasteredCardsArray.append(flashcards[index]) // add card to unmastered card array
+        if index >= 0 && index < flashcards.count {
+            flashcards[index].isMastered = false
         }
     }
-    
     
     // unmark an existing mastered card if it has a valid index
     mutating func unmarkMasteredCard(at index: Int){

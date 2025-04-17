@@ -34,9 +34,10 @@ struct CreateFlashCardSet: View {
             
             VStack{
                 returnHomeScreen
-                namingTitle     // Naming Flashcard Set
-                flashcardList   // Flashcards set
-         
+                
+                // flashcard set -- title and cards
+                FlashcardEditorView(title: $title, flashcards: $flashcards) // Flashcards set
+
                 // Show error message if the flashcard set isn't valid
                 if let errorMessage = errorMessage {
                     Text(errorMessage)
@@ -162,7 +163,10 @@ struct CreateFlashCardSet: View {
                         
                         // Scroll to the newly added card
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {  // time to allow for the new card to be added
-                            proxy.scrollTo(flashcards.count - 1, anchor: .bottom) // Scroll for newly added card to be seen
+                            // makes adding the card loook more naturally than appear abruptly
+                            withAnimation {
+                                proxy.scrollTo("BottomSpacer", anchor: .bottom) // Scroll to "BottomSpacer" element so the card and "add" button are in within view
+                            }
                         }
                     }) {
                         HStack {
@@ -175,7 +179,13 @@ struct CreateFlashCardSet: View {
                     }
                     .listRowBackground(Color.clear) // transparent background for the list row
                     .listRowInsets(EdgeInsets())    // removes unwanted padding
+                    
+                    Color.clear
+                    .frame(height: 1)
+                    .id("BottomSpacer").listRowBackground(Color.clear)
                 }
+                
+                
                 
             }
             .listStyle(PlainListStyle())

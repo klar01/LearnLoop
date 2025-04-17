@@ -3,7 +3,7 @@
 //  LearnLoop
 //
 //  Created by Klarissa Navarro on 4/2/25.
-//
+// 
 
 import SwiftUI
 
@@ -44,7 +44,6 @@ struct StudySet:  View{
                         // removes the flashcard set
                         Button(action: {
                             // delete set
-                            //viewModel.removeFlashcardSet(title: flashCardSet.title)
                             viewModel.removeFlashcardSetByIndex(index: indexOfSet)
                             
                             // Dismiss the current view and go back to HomeScreen
@@ -82,7 +81,7 @@ struct StudySet:  View{
                         }.cornerRadius(10)
                         
                         // Edit set
-                        NavigationLink(destination: CreateFlashCardSet(viewModel: viewModel)) {
+                        NavigationLink(destination: EditFlashCardSet(viewModel: viewModel, indexOfSet: indexOfSet)) {
                             Text("Edit Set")
                                 .padding()
                                 .foregroundColor(.black)
