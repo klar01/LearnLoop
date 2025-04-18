@@ -29,42 +29,36 @@ class FlashcardSetViewModel: ObservableObject {
         ])
     ]
     
-    // current question for a specifc flashcard set
+    // current card's question for a specifc flashcard set
     func currentQuestion(indexOfSet: Int) -> String {
         if indexOfSet >= 0 && indexOfSet < flashcardSet.count {
             if let currQuestion = flashcardSet[indexOfSet].getCurrentQuestion() {
                 return currQuestion
-            } else {
-                return "You're done studying!"
             }
+            return "Question--You're done studying!"
+            
         }
-        return "Index out of range"
-        
+         return "Index out of range"
     }
     
-    // current answer for a specifc flashcard set
+    // current card's answer for a specifc flashcard set
     func currentAnswer(indexOfSet: Int) -> String {
         if indexOfSet >= 0 && indexOfSet < flashcardSet.count {
             if let currAnswer = flashcardSet[indexOfSet].getCurrentAnswer() {
                 return currAnswer
-            } else {
-                return "You're done studying!"
             }
+            return "ANSWER-- You're done studying!"
+            
         }
         return "Index out of range"
     }
     
-    // find the next card within the current set, which set is found via index
+    // get the next card within the current set, which set is found via index
     func nextCardInSet(indexOfSet: Int) {
-        print("card No.: \(flashcardSet[indexOfSet].cardNumber + 1) ......... index: \(flashcardSet[indexOfSet].cardNumber)")
-        
         // Only move to the next card if there is a next one
         if flashcardSet[indexOfSet].cardNumber < flashcardSet[indexOfSet].flashcards.count {
             flashcardSet[indexOfSet].nextCard()
-        } else {
-            print("Already reached the end of the cards.")
         }
-
     }
     
     // assign card as mastered within the current set, which set is found via index
@@ -105,28 +99,30 @@ class FlashcardSetViewModel: ObservableObject {
         return flashcardSet[setIndex].getProgressOfMastery()
     }
     
-    // progress bar of how mnay cards the user has currently studied in set
+    // progress bar of how many cards the user has currently studied in set
     func progessOfCardsStudied(for setIndex: Int) -> Float{
         return flashcardSet[setIndex].getProgressOfCardsStudied()
     }
     
-    
     // shuffle the cards within the current set, which set is found via index
     func suffleCardsInSet(indexOfSet: Int){
         flashcardSet[indexOfSet].shuffleCards()
-        
+                
         // print the questions of each card to see if they are shuffled
         for flashcard in flashcardSet[indexOfSet].flashcards {
             print(flashcard.question)
         }
-    }
-    
-    //
-    func resetStudyProgress(for index: Int) {
-        flashcardSet[index].cardNumber = 0
         
     }
-    
+
+    // filter out the cards by their status in a batch
+    func getStudiedCards(indexOfSet: Int, status: String) -> [Flashcard] {
+        if(status == "Learning"){
+            return flashcardSet[indexOfSet].unmasteredCardsArray
+        }
+        return flashcardSet[indexOfSet].masteredCardsArray
+    }
+
     // editing the flashcard set -- add/remove/edit cards and edit title
     func updateFlashcardSet(at index: Int, newTitle: String, newFlashcards: [Flashcard]) {
         guard index >= 0 && index < flashcardSet.count else { return }

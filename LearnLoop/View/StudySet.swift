@@ -69,7 +69,8 @@ struct StudySet:  View{
                     
                     // Button Container
                     VStack (spacing: 20){
-                        NavigationLink(destination: StudyMode(viewModel: viewModel, flashCardSet: flashCardSet, indexOfSet: indexOfSet)) {
+                
+                        NavigationLink(destination: StudyMode(viewModel: viewModel, indexOfSet: indexOfSet)) {
                             Text("Study Set")
                                 .padding()
                                 .foregroundColor(.black)

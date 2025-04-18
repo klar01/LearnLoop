@@ -13,18 +13,21 @@ import SwiftUI
 struct StudyMode: View{
     // values passed from StudySet
     @ObservedObject var viewModel: FlashcardSetViewModel
-    @State var flashCardSet: FlashCardSet
+    //@State var flashCardSet: FlashCardSet
     var indexOfSet: Int
     
+    //@State private var shuffledCards: [Flashcard] = [] // NEW
+    //@State private var currentCardIndex: Int = 0
     var body: some View{
         ZStack{
+            let flashcardSet = viewModel.flashcardSet[indexOfSet]
             // Background Color
             Color(red: 28/255, green: 28/255, blue: 30/255)
                 .edgesIgnoringSafeArea(.all) // Color the entire screen
             
             VStack{
                 VStack{
-                    Text("Currently studying: \(flashCardSet.title)")
+                    Text("Currently studying: \(flashcardSet.title)")
                         .foregroundColor(.white)
                         .fontWeight(.bold)
                         .font(.title3)
@@ -33,7 +36,7 @@ struct StudyMode: View{
                 
                 // Progress Bar -- the number of cards left to go through in set
                 VStack{
-                    Text("\(viewModel.flashcardSet[indexOfSet].cardNumber) / \(flashCardSet.flashcards.count)").foregroundColor(.white).padding()
+                    Text("\(flashcardSet.cardNumber) / \(flashcardSet.flashcards.count)").foregroundColor(.white).padding()
                     
                     //progress bar
                     ProgressView(value: viewModel.progessOfCardsStudied(for: indexOfSet), total: 1.0)
@@ -52,22 +55,28 @@ struct StudyMode: View{
                         Text("Great job!").padding().foregroundColor(.white).fontWeight(.bold)
                         
                         // Navigate back to Progress result screen
-                        NavigationLink(destination: ProgressResults(viewModel: viewModel, flashCardSet: flashCardSet, indexOfSet: indexOfSet)) {
+                        NavigationLink(destination: ProgressResults(viewModel: viewModel, indexOfSet: indexOfSet)) {
                             Text("View Results")
                                 .padding()
                                 .foregroundColor(.black)
                                 .fontWeight(.bold)
                                 .background(Color(red: 218/255, green: 143/255, blue: 255))
+                                
                         }
                         .cornerRadius(10)
                         .frame(maxWidth: 200)
-                        
+                       
                     }
                     
-                    ForEach (flashCardSet.flashcards.indices, id: \.self) { index in
-                        CardView(viewModel: viewModel, flashCardSet: flashCardSet, indexOfSet: indexOfSet)
+                    // flashcard stack
+                    ForEach(flashcardSet.flashcards, id: \.id) { card in
+                        CardView(viewModel: viewModel, indexOfSet: indexOfSet)
                     }
+                    
                    
+                }.onAppear {
+                    // guarantees that the progress bar will reset and suffle cards 
+                    viewModel.suffleCardsInSet(indexOfSet: indexOfSet)
                 }
                 
             
@@ -91,19 +100,21 @@ struct StudyMode: View{
     
 }
 
+
 #Preview {
-    // Create a sample FlashcardSet to pass to StudyMode
     let viewModel = FlashcardSetViewModel()
-    let sampleSet = FlashCardSet(title: "Sample Set", flashcards: [
-        Flashcard(q: "What is Swift?", a: "A programming language"),
-        Flashcard(q: "What is 2 + 2?", a: "4"),
-        Flashcard(q: "color of sky?", a: "blue"),
-        Flashcard(q: "my name?", a: "some name"),
-        Flashcard(q: "What is 2 + 2?", a: "4"),
-        Flashcard(q: "color of grass?", a: "green"),
-        Flashcard(q: "u like jazz?", a: "no"),
-    ])
+    viewModel.flashcardSet = [
+        FlashCardSet(title: "Sample Set", flashcards: [
+            Flashcard(q: "What is Swift?", a: "A programming language"),
+            Flashcard(q: "What is 2 + 2?", a: "4"),
+            Flashcard(q: "Color of sky?", a: "Blue"),
+            Flashcard(q: "My name?", a: "Some name"),
+            Flashcard(q: "What is 10?", a: "A number"),
+            Flashcard(q: "Color of grass?", a: "Green"),
+            Flashcard(q: "U like jazz?", a: "No")
+        ])
+    ]
     
-    // Return the StudyMode view with both viewModel and sampleSet
-    StudyMode(viewModel: viewModel, flashCardSet: sampleSet, indexOfSet: 0)
+    return StudyMode(viewModel: viewModel, indexOfSet: 0);
 }
+

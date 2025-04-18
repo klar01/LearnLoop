@@ -14,6 +14,20 @@ struct HomeScreen: View {
     @State private var index: Int? = nil  // Store the index of the found set
     @State private var resetSearch: Bool = false
     
+    // dynamically displays the flashcard set(s) based on search input
+    var filteredSets: [FlashCardSet] {
+        // show all sets if there is no input
+        if cardSetTitle.isEmpty {
+            return viewModel.flashcardSet
+        }
+        // show the possible flashcard sets that the user could be looking for based on the input
+        else {
+            return viewModel.flashcardSet.filter {
+                $0.title.lowercased().contains(cardSetTitle.lowercased())
+            }
+        }
+    }
+    
     var body: some View {
         
         NavigationView{
@@ -30,21 +44,31 @@ struct HomeScreen: View {
                     // Search bar
                     searchBar
                     
-                    // Show ONLY searched set if found
-                    if let set = searchedSet {
-                        Spacer()
-                        IndividualSet(viewModel: viewModel, title: set.title, index: index ?? 0)
+                    // Show message if no results
+                    if filteredSets.isEmpty && !cardSetTitle.isEmpty {
+                        Text("No flashcard set found with '\(cardSetTitle)'")
+                            .foregroundColor(.red)
                         Spacer()
                         
                     } else {
-                        // Display an error message if the set is not found
-                        if !cardSetTitle.isEmpty {
-                            Text("Flashcard set '\(cardSetTitle)' does not exist")
-                                .foregroundColor(.red)
+                        // Show flashcard sets
+                        ScrollView {
+                            VStack() {
+                                
+                                ForEach(filteredSets.indices, id: \.self) { index in
+                                    if let originalIndex = viewModel.flashcardSet.firstIndex(where: { $0.title == filteredSets[index].title }) {
+                                        
+                                        // click on a set to either edit or study
+                                        NavigationLink(destination: StudySet(viewModel: viewModel, flashCardSet: viewModel.flashcardSet[index], indexOfSet: index)) {
+                                            
+                                            // displays the set name and its progress mastery bar
+                                            IndividualSet(viewModel: viewModel, title: filteredSets[index].title, index: originalIndex)
+                                        }
+                                        
+                                    }
+                                }
+                            }
                         }
-                        
-                        // Displays all of user's flashcard set`
-                        flashcardSetsList
                     }
                     
                     // navigate to the screen to create a flashcard set
@@ -56,17 +80,17 @@ struct HomeScreen: View {
                             .background(Color(red: 218/255, green: 143/255, blue: 255))
                     }.cornerRadius(10)
                     
-
+                    
                 }.padding()
-   
+                
             }
-
+            
         }.navigationBarBackButtonHidden(true)
         
     }
     
     // MARK: - SUBVIEWS
-    // search bar
+    // MARK: - search bar
     var searchBar : some View{
         HStack{
             Image(systemName: "magnifyingglass")
@@ -76,34 +100,20 @@ struct HomeScreen: View {
             
             TextField("", text: $cardSetTitle, prompt: Text("Search").foregroundColor(.white)
             )
-            .onSubmit {
-                // Handle search submission
-                if let foundIndex = submitSearchEntry(title: cardSetTitle) {
-                    // Update when the index is found
-                    index = foundIndex
-                    searchedSet = viewModel.flashcardSet[foundIndex]
-                } else {
-                    // Reset the state if no set is found
-                    index = nil
-                    searchedSet = nil
-                }
-            }
+            
             .autocapitalization(.none) // Prevents automatic capitalization
             .foregroundColor(.white)
             .padding(.trailing, 20) // Adds padding to the right
             
-            Button(action: {
-                cardSetTitle = ""
-                index = nil
-                searchedSet = nil
-                
-            }){
-                Image(systemName: "clear.fill")
-                    .font(.system(size: 20)) // Adjust the size here
-                    .fontWeight(.black)
-                    .foregroundColor(.white)
-                    .padding()
-                
+            // Clear search input button
+            if !cardSetTitle.isEmpty {
+                Button(action: {
+                    cardSetTitle = ""
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.white)
+                        .padding(.trailing)
+                }
             }
             
         }
@@ -112,40 +122,6 @@ struct HomeScreen: View {
         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1))
     }
     
-    func submitSearchEntry(title: String) -> Int? {
-        if let index = viewModel.flashcardSet.firstIndex(where: { $0.title.lowercased() == title.lowercased() }) {
-            return index
-        } else {
-            return nil
-        }
-    }
-    
-    // flashcard sets 
-    var flashcardSetsList: some View{
-        ScrollView {
-            //Flashcard Sets --- Needs to be edited!!!
-            VStack{
-                // Display default message when there are no flashcard sets
-                if(viewModel.flashcardSet.isEmpty){
-                    Text("No flashcards yet, create a set!")
-                        .foregroundColor(.white)
-                }
-                
-                // Display all flashcard sets
-                ForEach(viewModel.flashcardSet.indices, id: \.self) { index in
-                    NavigationLink(destination: StudySet(viewModel: viewModel, flashCardSet: viewModel.flashcardSet[index], indexOfSet: index)) {
-                        
-                        // displays the set name and its progress mastery bar 
-                        IndividualSet(viewModel: viewModel, title: viewModel.flashcardSet[index].title, index: index)
-                        
-                    }
-                    
-                }
-                 
-            }
-            
-        }
-    }
 }
 
 #Preview {

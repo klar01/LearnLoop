@@ -3,62 +3,60 @@
 //  LearnLoop
 //
 //  Created by Klarissa Navarro on 3/31/25.
-//
+// NOTE: Replaced manual arrays w/computed property the  mastered/unmastered away to ensure the lists are accurate and in sync with the main flashcards array
+// NOTE: '$0' is shorthand syntax to refer to the current item
 
 import Foundation
 
 struct FlashCardSet{
     var title: String
-    var flashcards: [Flashcard]
+    var flashcards: [Flashcard] // full set (mastered and unmastered)
     var cardNumber = 0
     
-    // computed property
-    var unMastered: Int{
-        return flashcards.filter({ !$0.isMastered }).count // NOTE: '$0' is shorthand syntax to refer to the current item
-    }
-    
-    // computed property
-    var masteredCards: Int{
-        return flashcards.filter({ $0.isMastered }).count // NOTE: '$0' is shorthand syntax to refer to the current item
-    }
-    
-    // NOTE: Replaced manual arrays w/computed property the  mastered/unmastered away to ensure the lists are accurate and in sync with the main flashcards array
+   // array of only mastered cards
     var masteredCardsArray: [Flashcard] {
         flashcards.filter { $0.isMastered }
     }
-
+    // array of only mastered cards
     var unmasteredCardsArray: [Flashcard] {
         flashcards.filter { !$0.isMastered }
     }
     
-    // total cards in flashcard set
-    var total: Int {
-        return flashcards.count
+    // total unmastered cards
+    var unMastered: Int{
+        return flashcards.filter({ !$0.isMastered }).count
     }
+    
+    // total mastered cards
+    var masteredCards: Int{
+        return flashcards.filter({ $0.isMastered }).count
+    }
+    
+    // total cards in flashcard set
+    var total: Int { return flashcards.count}
     
     init(title: String, flashcards: [Flashcard]) {
         self.title = title
         self.flashcards = flashcards
     }
     
+    // get the current card's question
     func getCurrentQuestion() -> String? {
         guard cardNumber < flashcards.count else { return nil }
         return flashcards[cardNumber].question
     }
     
+    // get the current card's answer
     func getCurrentAnswer() -> String? {
         guard cardNumber < flashcards.count else { return nil}
         return flashcards[cardNumber].answer
     }
     
+    // get the current card
     mutating func nextCard(){
         if(cardNumber < flashcards.count){
             cardNumber = cardNumber + 1
         }
-    }
-    
-    mutating func incrementNumOfSwipes(){
-        cardNumber = cardNumber + 1
     }
     
     // show the how much of the cards the user has mastered out of all the cards
@@ -94,9 +92,9 @@ struct FlashCardSet{
     }
     
     // shuffle the cards in the set
-    mutating func shuffleCards(){
-        flashcards = flashcards.shuffled() // randomly reorder the elements of an array
+    mutating func shuffleCards() {
+        cardNumber = 0 // reseting to 0
+        flashcards = flashcards.shuffled() // randomly reorder the elements of array
     }
-    
     
 }

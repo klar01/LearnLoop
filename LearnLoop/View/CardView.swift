@@ -10,7 +10,7 @@ import SwiftUI
 // Display the font and back of card. You can tap card to view asnwer/question
 struct CardView: View{
     @ObservedObject var viewModel: FlashcardSetViewModel
-    @State var flashCardSet: FlashCardSet
+    //@State var flashCardSet: FlashCardSet
     var indexOfSet: Int
     
     // variables for card animation
@@ -127,19 +127,19 @@ struct CardView: View{
 }
 
 
-#Preview {
-    // Create a sample FlashcardSet to pass to StudyMode
-    let viewModel = FlashcardSetViewModel()
-    let sampleSet = FlashCardSet(title: "Sample Set", flashcards: [
-        Flashcard(q: "What is Swift?", a: "A programming language"),
-        Flashcard(q: "What is 2 + 2?", a: "4"),
-        Flashcard(q: "color of sky?", a: "blue"),
-        Flashcard(q: "my name?", a: "some name"),
-        Flashcard(q: "What is 2 + 2?", a: "4"),
-        Flashcard(q: "color of grass?", a: "green"),
-        Flashcard(q: "u like jazz?", a: "no"),
-    ])
-    
-    // Return the StudyMode view with both viewModel and sampleSet
-    CardView(viewModel: viewModel, flashCardSet: sampleSet, indexOfSet: 0)
-}
+//#Preview {
+//    // Create a sample FlashcardSet to pass to StudyMode
+//    let viewModel = FlashcardSetViewModel()
+//    let sampleSet = FlashCardSet(title: "Sample Set", flashcards: [
+//        Flashcard(q: "What is Swift?", a: "A programming language"),
+//        Flashcard(q: "What is 2 + 2?", a: "4"),
+//        Flashcard(q: "color of sky?", a: "blue"),
+//        Flashcard(q: "my name?", a: "some name"),
+//        Flashcard(q: "What is 2 + 2?", a: "4"),
+//        Flashcard(q: "color of grass?", a: "green"),
+//        Flashcard(q: "u like jazz?", a: "no"),
+//    ])
+//    
+//    // Return the StudyMode view with both viewModel and sampleSet
+//    CardView(viewModel: viewModel, indexOfSet: 0)
+//}
