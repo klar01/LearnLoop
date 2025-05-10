@@ -12,6 +12,7 @@ struct ProgressResults: View{
     //@State var flashCardSet:
     
     var indexOfSet: Int
+    var mode: FlashCardSet.StudyMode
     var clickMasteredButton: Bool = false
     var clickLearningButton: Bool = false
     
@@ -50,21 +51,24 @@ struct ProgressResults: View{
                         
                         // button will only appear if the user mastered ALL the cards
 //                        if(viewModel.flashcardSet[indexOfSet].masteredCards ==  viewModel.flashcardSet[indexOfSet].total){
-                           
+                        HStack{
                             // Restudy all the flashcards with shuffling
                             restudyButton(
-                                text: "Restart Flashcards",
-                                destination: StudyMode(viewModel: viewModel, indexOfSet: indexOfSet)
+                                text: "ALL cards",
+                                destination: StudyMode(viewModel: viewModel, indexOfSet: indexOfSet, mode: .fullSet)
                       
                             )
                             
 //                        } else {
                             // Restudy ONLY the LEARNING flashcards
                             restudyButton(
-                                text: "Keep Reviewing \(viewModel.flashcardSet[indexOfSet].unMastered) cards",
-                                destination: StudyMode(viewModel: viewModel, indexOfSet: indexOfSet)
+                                text: "100 unmastered",
+                                destination: StudyMode(viewModel: viewModel, indexOfSet: indexOfSet, mode: .unmasteredOnly)
                             )
 //                        }
+                            
+                        }
+                        
                         
                         // Visual Progress -- show total number of questions correct/wrong and circle progress bar
                         visualProgress
@@ -98,66 +102,84 @@ struct ProgressResults: View{
     // MARK: -  visual results
     var visualProgress: some View{
         VStack{
-            Text("Your Progress").padding().fontWeight(.semibold).foregroundColor(.white)
-            
-            HStack{
-                // Circle Progess Bar
-                ZStack {
-                    // Background Circle (Track)
-                    Circle()
-                        .stroke(lineWidth: 10)
-                        .foregroundColor(Color.white.opacity(0.3))
-                    
-                    
-                    Circle()
-                        .trim(from: 0.0, to: CGFloat(viewModel.progressForMastery(for: indexOfSet))) // Trims the circle based on the progress value
-                        .stroke(style: StrokeStyle(lineWidth: 12, lineCap: .round, lineJoin: .round))
-                        .foregroundColor(Color.yellow)
-                        .rotationEffect(.degrees(-90)) // Rotate to start the progress from the top
-                    
-                    
-                    // Percentage Text
-                    let roundedProgress = round(viewModel.progressForMastery(for: indexOfSet) * 100) / 100
-                    Text("\(Int(roundedProgress * 100))%")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
+            Text("Progress Breakdown").padding()
+                .foregroundColor(.white).fontWeight(.bold)
+            if mode != .fullSet {
+                VStack (alignment: .leading, spacing: 0){
+                    Text("Overall Set:").foregroundColor(.white).fontWeight(.semibold)
+                    MilestoneProgressBar(
+                        progress: CGFloat(viewModel.progressForMastery(for: indexOfSet)),
+                        milestones: [0, 0.25, 0.5, 0.75, 1]
+                    )
                 }
-                .frame(width: 120, height: 120)
                 .padding()
-                .padding(.bottom, 20)
+                .padding(.bottom, 70) // spacing between progress bars
+            }
+            
+            VStack (alignment: .leading, spacing: 2){
+                Text("Session Progress: \(mode == .fullSet ? "full set" : "unmastered set")")
+                    .foregroundColor(.white).fontWeight(.semibold).padding(.horizontal)
                 
-                VStack{
-                    // number of card mastered
-                    HStack{
-                        Text("Mastered").padding().fontWeight(.semibold).font(.caption)
-                        Spacer()
-                        Text("\(viewModel.flashcardSet[indexOfSet].masteredCards)").padding().fontWeight(.semibold).font(.caption)
+                HStack{
+                    // Circle Progess Bar
+                    
+                    ZStack {
+                        // Background Circle (Track)
+                        Circle()
+                            .stroke(lineWidth: 10)
+                            .foregroundColor(Color.white.opacity(0.3))
+                        
+                        
+                        Circle()
+                            .trim(from: 0.0, to: CGFloat(viewModel.progressForMastery(for: indexOfSet))) // Trims the circle based on the progress value
+                            .stroke(style: StrokeStyle(lineWidth: 12, lineCap: .round, lineJoin: .round))
+                            .foregroundColor(Color.yellow)
+                            .rotationEffect(.degrees(-90)) // Rotate to start the progress from the top
+                        
+                        
+                        // Percentage Text
+                        let roundedProgress = round(viewModel.progressForMastery(for: indexOfSet) * 100) / 100
+                        Text("\(Int(roundedProgress * 100))%")
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
                     }
-                    .background(Color(red: 144/255, green: 238/255, blue: 144/255))
-                    .cornerRadius(15)
-                    .padding(.trailing, 5)
+                    .frame(width: 120, height: 120)
+                    .padding()
+                    .padding(.bottom, 20)
                     
-                    
-                    // number of card still learning
-                    HStack{
-                        Text("Still Learning").padding().fontWeight(.semibold).font(.caption)
-                        Spacer()
-                        Text("\(viewModel.flashcardSet[indexOfSet].unMastered)").padding().fontWeight(.semibold).font(.caption)
-                    }.background(Color(red: 255, green: 127/255, blue: 127/255))
+                    VStack{
+                        // number of card mastered
+                        HStack{
+                            Text("Mastered").padding().fontWeight(.semibold).font(.caption)
+                            Spacer()
+                            Text("\(viewModel.flashcardSet[indexOfSet].masteredCards)").padding().fontWeight(.semibold).font(.caption)
+                        }
+                        .background(Color(red: 144/255, green: 238/255, blue: 144/255))
                         .cornerRadius(15)
                         .padding(.trailing, 5)
+                        
+                        
+                        // number of card still learning
+                        HStack{
+                            Text("Still Learning").padding().fontWeight(.semibold).font(.caption)
+                            Spacer()
+                            Text("\(viewModel.flashcardSet[indexOfSet].unMastered)").padding().fontWeight(.semibold).font(.caption)
+                        }.background(Color(red: 255, green: 127/255, blue: 127/255))
+                            .cornerRadius(15)
+                            .padding(.trailing, 5)
+                        
+                        
+                        // total questions
+                        HStack{
+                            Text("Total").padding().fontWeight(.semibold).font(.caption)
+                            Spacer()
+                            Text("\(viewModel.flashcardSet[indexOfSet].total)").padding().fontWeight(.semibold).font(.caption)
+                        }.foregroundColor(.white)
+                            .padding(.trailing, 5)
+                    }
                     
-                    
-                    // total questions
-                    HStack{
-                        Text("Total").padding().fontWeight(.semibold).font(.caption)
-                        Spacer()
-                        Text("\(viewModel.flashcardSet[indexOfSet].total)").padding().fontWeight(.semibold).font(.caption)
-                    }.foregroundColor(.white)
-                        .padding(.trailing, 5)
                 }
-                
             }
             
         }
@@ -199,7 +221,7 @@ struct ProgressResults: View{
                 .padding()
                 .shadow(color: .gray.opacity(0.5), radius: 10, x: 0, y: 5) // Add shadow to "pop" the container forward
 
-            let cards = viewModel.getStudiedCards(indexOfSet: indexOfSet, status: selectedState)
+            let cards = viewModel.getStudiedCards(indexOfSet: indexOfSet, status: selectedState, mode: mode)
             VStack {
                 
                 ForEach(cards, id: \.id) { card in
@@ -252,29 +274,29 @@ struct ProgressResults: View{
     }
     
     
-    #Preview {
-        ProgressResultsPreviewWrapper()
-    }
-    
-    struct ProgressResultsPreviewWrapper: View {
-        @StateObject private var viewModel = FlashcardSetViewModel()
-        
-        init() {
-            let sampleSet = FlashCardSet(title: "Sample Set", flashcards: [
-                Flashcard(q: "What is Swift?", a: "A programming language"),
-                Flashcard(q: "What is 2 + 2?", a: "4"),
-                Flashcard(q: "color of sky?", a: "blue"),
-                Flashcard(q: "my name?", a: "some name"),
-                Flashcard(q: "What is 2 + 2?", a: "4"),
-                Flashcard(q: "color of grass?", a: "green"),
-                Flashcard(q: "u like jazz?", a: "no"),
-            ])
-            viewModel.flashcardSet.append(sampleSet)
-        }
-        
-        var body: some View {
-            ProgressResults(viewModel: viewModel, indexOfSet: 0)
-        }
-    }
-    
+//    #Preview {
+//        ProgressResultsPreviewWrapper()
+//    }
+//    
+//    struct ProgressResultsPreviewWrapper: View {
+//        @StateObject private var viewModel = FlashcardSetViewModel()
+//        
+//        init() {
+//            let sampleSet = FlashCardSet(title: "Sample Set", flashcards: [
+//                Flashcard(q: "What is Swift?", a: "A programming language"),
+//                Flashcard(q: "What is 2 + 2?", a: "4"),
+//                Flashcard(q: "color of sky?", a: "blue"),
+//                Flashcard(q: "my name?", a: "some name"),
+//                Flashcard(q: "What is 2 + 2?", a: "4"),
+//                Flashcard(q: "color of grass?", a: "green"),
+//                Flashcard(q: "u like jazz?", a: "no"),
+//            ])
+//            viewModel.flashcardSet.append(sampleSet)
+//        }
+//        
+//        var body: some View {
+//            ProgressResults(viewModel: viewModel, indexOfSet: 0)
+//        }
+//    }
+   
 }

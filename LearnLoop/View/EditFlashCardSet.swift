@@ -12,9 +12,21 @@ struct EditFlashCardSet: View {
     
     @State private var title: String
     @State private var flashcards: [Flashcard]
+    var onSave: (() -> Void)? = nil
     
     //@State private var errorMessage: String?
     @Environment(\.presentationMode) var presentationMode
+    
+    init(viewModel: FlashcardSetViewModel, indexOfSet: Int, onSave: (() -> Void)? = nil) {
+        self.viewModel = viewModel
+        self.indexOfSet = indexOfSet
+        self.onSave = onSave
+        let set = viewModel.flashcardSet[indexOfSet]
+        
+        _title = State(initialValue: set.title)
+        _flashcards = State(initialValue: set.flashcards)
+    }
+
     
     // allows to safely extract the existing flashcard set’s data and assign it to the @State variables
     init(viewModel: FlashcardSetViewModel, indexOfSet: Int) {
@@ -55,7 +67,7 @@ struct EditFlashCardSet: View {
             NavigationLink(
                 destination: StudySet(
                     viewModel: viewModel,
-                    flashCardSet: viewModel.flashcardSet[indexOfSet],
+                    
                     indexOfSet: indexOfSet)
             ) {
                 Image(systemName: "arrow.left")
@@ -82,6 +94,8 @@ struct EditFlashCardSet: View {
             Button(action:{
                 // need to edit the umastered card list & mastsered card list too
                 viewModel.updateFlashcardSet(at: indexOfSet, newTitle: title, newFlashcards: flashcards)
+                
+                onSave?() // triggers the reloadID change
                 
                 // Dismiss the current view and go back to HomeScreen
                 presentationMode.wrappedValue.dismiss()

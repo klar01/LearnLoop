@@ -15,9 +15,9 @@ class FlashcardSetViewModel: ObservableObject {
         FlashCardSet(title: "rand title 1", flashcards: [
             Flashcard(q: "some question 1: dhjnj njnj jknnj j d ds hsbh jks sd sd ds hsbh jks sd s hsbhj jks nj jks sd sd ds hsbh nj jks sd sd ds hsbh nj jks sd sd ds hsbh  sd sd ds hsbhs sd sd ds hsbh nj jks s j sh nj j sd ds hsbh jks sd sd ds hsbh jks sd s hsbhj jks nj jks sd sd ds hsbh nj jks sd sd ds hsbh nj jks sd sd ds hsbh  sd sd ds hsbhs sd sd ds hsbh nj jks s j sh nj jks sd sd ds hsbh jks sd sd ds hsbh jks sd sd ds hsbhbjhs", a: "some answer for question 1"),
             Flashcard(q: "QUESTION 2nd", a: "some answer for question 2nd  ds hsbh jks sd sd ds hsbh jks sd s hsbhj jks nj jks sd sd ds hsbh nj jks sd sd ds hsbh nj jks sd sd ds hsbh  sd sd ds hsbhs sd sd ds hsbh nj jks s j sh nj jks sd sd d"),
-            Flashcard(q: "What is Swift?", a: "A programming language"),
-            Flashcard(q: "What is 2 + 2?", a: "4"),
-            Flashcard(q: "color of sky?", a: "blue"),
+            Flashcard(q: "What is Swift?", a: "A programming language", isMastered: true),
+            Flashcard(q: "What is 2 + 2?", a: "4", isMastered: true),
+            Flashcard(q: "color of sky?", a: "blue", isMastered: true),
             Flashcard(q: "my name?", a: "some name"),
             Flashcard(q: "What is 10?", a: "a number"),
             Flashcard(q: "color of grass?", a: "green"),
@@ -29,10 +29,10 @@ class FlashcardSetViewModel: ObservableObject {
         ])
     ]
     
-    // current card's question for a specifc flashcard set
+    //current card's question for a specifc flashcard set
     func currentQuestion(indexOfSet: Int) -> String {
         if indexOfSet >= 0 && indexOfSet < flashcardSet.count {
-            if let currQuestion = flashcardSet[indexOfSet].getCurrentQuestion() {
+            if let currQuestion = flashcardSet[indexOfSet].getCurrentCard()?.question {
                 return currQuestion
             }
             return "Question--You're done studying!"
@@ -44,7 +44,7 @@ class FlashcardSetViewModel: ObservableObject {
     // current card's answer for a specifc flashcard set
     func currentAnswer(indexOfSet: Int) -> String {
         if indexOfSet >= 0 && indexOfSet < flashcardSet.count {
-            if let currAnswer = flashcardSet[indexOfSet].getCurrentAnswer() {
+            if let currAnswer = flashcardSet[indexOfSet].getCurrentCard()?.answer {
                 return currAnswer
             }
             return "ANSWER-- You're done studying!"
@@ -55,28 +55,19 @@ class FlashcardSetViewModel: ObservableObject {
     
     // get the next card within the current set, which set is found via index
     func nextCardInSet(indexOfSet: Int) {
-        // Only move to the next card if there is a next one
-        if flashcardSet[indexOfSet].cardNumber < flashcardSet[indexOfSet].flashcards.count {
-            flashcardSet[indexOfSet].nextCard()
+        if flashcardSet[indexOfSet].cardNumber < flashcardSet[indexOfSet].currentSessionCards.count {
+            flashcardSet[indexOfSet].incrementCard()
         }
     }
     
     // assign card as mastered within the current set, which set is found via index
     func masteredCard (indexOfSet: Int){
-        let currCard = flashcardSet[indexOfSet].cardNumber
-        flashcardSet[indexOfSet].markCardAsMastered(at: currCard)
+        flashcardSet[indexOfSet].markCurrentCardAsMastered()
     }
     
     // assign card as UNMASTERED within the current set, which set is found via index
     func unmasteredCard (indexOfSet: Int){
-        let currCard = flashcardSet[indexOfSet].cardNumber
-        flashcardSet[indexOfSet].markCardAsUnmastered(at: currCard)
-    }
-    
-    // assign mastered card back to  unmastered within the current set, which set is found via index
-    func unmarkMasteredCard (indexOfSet: Int){
-        let currCard = flashcardSet[indexOfSet].cardNumber
-        flashcardSet[indexOfSet].unmarkMasteredCard(at: currCard)
+        flashcardSet[indexOfSet].markCurrentCardAsUnmastered()
     }
     
     // adding a flashcard set
@@ -88,39 +79,51 @@ class FlashcardSetViewModel: ObservableObject {
     // remove flashcard set by index
     func removeFlashcardSetByIndex(index: Int){
         // check if the index is valid
-        if index >= 0 && index < flashcardSet.count{
-            flashcardSet.remove(at: index);
-            print("Flashcard Set removed at: \(index)")
-        }
+//        if index >= 0 && index < flashcardSet.count{
+//            print("Flashcard Set removed at: \(index)")
+//            print("Flashcard Set count: \(flashcardSet.count)")
+////            flashcardSet.remove(at: index);
+//            
+//        }
+        if index >= 0 && index < flashcardSet.count {
+                print("Flashcard Set removed at: \(index)")
+                flashcardSet.remove(at: index)
+                print("Flashcard Set count AFTER removal: \(flashcardSet.count)")
+            } else {
+                print("❌ Index \(index) is out of bounds. Count: \(flashcardSet.count)")
+            }
     }
     
     // progress bar of mastery for a specifc flashcard set
     func progressForMastery(for setIndex: Int) -> Float{
-        return flashcardSet[setIndex].getProgressOfMastery()
+        return flashcardSet[setIndex].getProgressOfOverallMastery()
     }
     
-    // progress bar of how many cards the user has currently studied in set
+    //progress bar of how many cards the user has currently studied in set
     func progessOfCardsStudied(for setIndex: Int) -> Float{
-        return flashcardSet[setIndex].getProgressOfCardsStudied()
+        return flashcardSet[setIndex].getProgressOfCardsStudiedSession()
     }
     
-    // shuffle the cards within the current set, which set is found via index
+    //shuffle the cards within the current set, which set is found via index
     func suffleCardsInSet(indexOfSet: Int){
-        flashcardSet[indexOfSet].shuffleCards()
-                
-        // print the questions of each card to see if they are shuffled
-        for flashcard in flashcardSet[indexOfSet].flashcards {
+        flashcardSet[indexOfSet].shuffleSessionCards()
+        
+        for flashcard in flashcardSet[indexOfSet].currentSessionCards {
             print(flashcard.question)
         }
         
     }
 
-    // filter out the cards by their status in a batch
-    func getStudiedCards(indexOfSet: Int, status: String) -> [Flashcard] {
+    //IN PROGRESS -- filter out the cards by their status in a batch
+    func getStudiedCards(indexOfSet: Int, status: String, mode: FlashCardSet.StudyMode) -> [Flashcard] {
+//        if(status == "Learning"){
+//            return flashcardSet[indexOfSet].unmasteredCardsArray
+//        }
+//        return flashcardSet[indexOfSet].masteredCardsArray
         if(status == "Learning"){
-            return flashcardSet[indexOfSet].unmasteredCardsArray
+            return flashcardSet[indexOfSet].currentSessionCards.filter({ !$0.isMastered })
         }
-        return flashcardSet[indexOfSet].masteredCardsArray
+        return flashcardSet[indexOfSet].currentSessionCards.filter({ $0.isMastered })
     }
 
     // editing the flashcard set -- add/remove/edit cards and edit title
@@ -163,6 +166,10 @@ class FlashcardSetViewModel: ObservableObject {
         flashcardSet[index].title = newTitle
         flashcardSet[index].flashcards = updatedFlashcards
        
+    }
+    
+    func setModeSession (indexOfSet: Int, mode: FlashCardSet.StudyMode){
+        flashcardSet[indexOfSet].startStudySession(mode: mode)
     }
     
 }

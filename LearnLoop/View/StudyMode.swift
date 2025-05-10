@@ -15,12 +15,14 @@ struct StudyMode: View{
     @ObservedObject var viewModel: FlashcardSetViewModel
     //@State var flashCardSet: FlashCardSet
     var indexOfSet: Int
+    var mode: FlashCardSet.StudyMode
     
     //@State private var shuffledCards: [Flashcard] = [] // NEW
     //@State private var currentCardIndex: Int = 0
     var body: some View{
         ZStack{
             let flashcardSet = viewModel.flashcardSet[indexOfSet]
+            
             // Background Color
             Color(red: 28/255, green: 28/255, blue: 30/255)
                 .edgesIgnoringSafeArea(.all) // Color the entire screen
@@ -36,7 +38,7 @@ struct StudyMode: View{
                 
                 // Progress Bar -- the number of cards left to go through in set
                 VStack{
-                    Text("\(flashcardSet.cardNumber) / \(flashcardSet.flashcards.count)").foregroundColor(.white).padding()
+                    Text("\(flashcardSet.cardNumber) / \(flashcardSet.currentSessionCards.count)").foregroundColor(.white).padding()
                     
                     //progress bar
                     ProgressView(value: viewModel.progessOfCardsStudied(for: indexOfSet), total: 1.0)
@@ -49,13 +51,13 @@ struct StudyMode: View{
                 Spacer()
 
                 //Display all cards -- all stacked on top of each other
-                ZStack {
+                VStack {
                     
-                    VStack{
+                    ZStack{
                         Text("Great job!").padding().foregroundColor(.white).fontWeight(.bold)
                         
                         // Navigate back to Progress result screen
-                        NavigationLink(destination: ProgressResults(viewModel: viewModel, indexOfSet: indexOfSet)) {
+                        NavigationLink(destination: ProgressResults(viewModel: viewModel, indexOfSet: indexOfSet, mode: mode)) {
                             Text("View Results")
                                 .padding()
                                 .foregroundColor(.black)
@@ -65,17 +67,25 @@ struct StudyMode: View{
                         }
                         .cornerRadius(10)
                         .frame(maxWidth: 200)
+                        
+                        ForEach(flashcardSet.currentSessionCards, id: \.id) { card in
+                            CardView(viewModel: viewModel, indexOfSet: indexOfSet)
+                        }
                        
                     }
                     
                     // flashcard stack
-                    ForEach(flashcardSet.flashcards, id: \.id) { card in
-                        CardView(viewModel: viewModel, indexOfSet: indexOfSet)
-                    }
+//                    ForEach(flashcardSet.flashcards, id: \.id) { card in
+//                    ForEach(flashcardSet.currentSessionCards, id: \.id) { card in
+////                        let question = viewModel.currentQuestion(indexOfSet: indexOfSet)
+////                        Text("question: \(question)").foregroundStyle(.white)
+//                        CardView(viewModel: viewModel, indexOfSet: indexOfSet)
+//                    }
                     
                    
                 }.onAppear {
-                    // guarantees that the progress bar will reset and suffle cards 
+                    viewModel.setModeSession(indexOfSet: indexOfSet, mode: mode)
+                    // guarantees that the progress bar will reset and suffle cards
                     viewModel.suffleCardsInSet(indexOfSet: indexOfSet)
                 }
                 
@@ -95,26 +105,35 @@ struct StudyMode: View{
                 
             }.padding()
             
-        }.navigationBarBackButtonHidden(true)
+        }
+        .navigationBarBackButtonHidden(true)
     }
     
 }
 
 
 #Preview {
-    let viewModel = FlashcardSetViewModel()
-    viewModel.flashcardSet = [
-        FlashCardSet(title: "Sample Set", flashcards: [
-            Flashcard(q: "What is Swift?", a: "A programming language"),
-            Flashcard(q: "What is 2 + 2?", a: "4"),
-            Flashcard(q: "Color of sky?", a: "Blue"),
-            Flashcard(q: "My name?", a: "Some name"),
-            Flashcard(q: "What is 10?", a: "A number"),
-            Flashcard(q: "Color of grass?", a: "Green"),
-            Flashcard(q: "U like jazz?", a: "No")
-        ])
-    ]
+    let viewModel: FlashcardSetViewModel = {
+        let vm = FlashcardSetViewModel()
+        let sampleSet = FlashCardSet(
+            title: "Sample Set",
+            flashcards: [
+                Flashcard(q: "What is Swift?", a: "A programming language"),
+                Flashcard(q: "What is 2 + 2?", a: "4"),
+                Flashcard(q: "Color of sky?", a: "Blue"),
+                Flashcard(q: "My name?", a: "Some name"),
+                Flashcard(q: "What is 10?", a: "A number"),
+                Flashcard(q: "Color of grass?", a: "Green"),
+                Flashcard(q: "U like jazz?", a: "No")
+            ]
+        )
+        vm.flashcardSet.append(sampleSet)
+        vm.setModeSession(indexOfSet: 0, mode: .unmasteredOnly) // Simulate session setup
+        vm.suffleCardsInSet(indexOfSet: 0) // Shuffle for realism
+        return vm
+    }()
     
-    return StudyMode(viewModel: viewModel, indexOfSet: 0);
+    return StudyMode(viewModel: viewModel, indexOfSet: 0, mode: .unmasteredOnly)
 }
+
 

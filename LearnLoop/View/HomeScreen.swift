@@ -59,7 +59,7 @@ struct HomeScreen: View {
                                     if let originalIndex = viewModel.flashcardSet.firstIndex(where: { $0.title == filteredSets[index].title }) {
                                         
                                         // click on a set to either edit or study
-                                        NavigationLink(destination: StudySet(viewModel: viewModel, flashCardSet: viewModel.flashcardSet[index], indexOfSet: index)) {
+                                        NavigationLink(destination: StudySet(viewModel: viewModel,  indexOfSet: index)) {
                                             
                                             // displays the set name and its progress mastery bar
                                             IndividualSet(viewModel: viewModel, title: filteredSets[index].title, index: originalIndex)
