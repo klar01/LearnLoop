@@ -67,11 +67,6 @@ struct StudySet:  View{
                     
                     Spacer()
                     
-                    // display the title of flashcard set with its progress bar
-                    
-//                    if let index = viewModel.flashcardSet.firstIndex(where: { $0.title == viewModel.flashcardSet[indexOfSet].title }) {
-//                        IndividualSet(viewModel: viewModel, title: viewModel.flashcardSet[indexOfSet].title, index: index)
-//                    }
                     if let index = viewModel.flashcardSet.firstIndex(where: { $0.title == setTitle }) {
                         IndividualSet(viewModel: viewModel, title: setTitle, index: index)
                     }
@@ -81,7 +76,7 @@ struct StudySet:  View{
                         HStack{
                             if viewModel.flashcardSet.firstIndex(where: { $0.title == setTitle }) != nil {
                                 NavigationLink(destination: StudyMode(viewModel: viewModel, indexOfSet: indexOfSet, mode: .fullSet)) {
-                                    Text("Study Set")
+                                    Text("Full Set")
                                         .padding()
                                         .foregroundColor(.black)
                                         .fontWeight(.bold)
@@ -91,18 +86,20 @@ struct StudySet:  View{
                                     
                                 }.cornerRadius(10)
                                 
-                                Spacer()
-                                
-                                NavigationLink(destination: StudyMode(viewModel: viewModel, indexOfSet: indexOfSet, mode: .unmasteredOnly)) {
-                                    Text("Unmastered")
-                                        .padding()
-                                        .foregroundColor(.black)
-                                        .fontWeight(.bold)
-                                        .frame(maxWidth: UIScreen.main.bounds.width - 40)
-                                        .cornerRadius(10)
-                                        .background(Color(red: 218/255, green: 143/255, blue: 255))
+                                if(viewModel.flashcardSet[indexOfSet].unMastered > 0) {
+                                    Spacer()
                                     
-                                }.cornerRadius(10)
+                                    NavigationLink(destination: StudyMode(viewModel: viewModel, indexOfSet: indexOfSet, mode: .unmasteredOnly)) {
+                                        Text("Unmastered Set")
+                                            .padding()
+                                            .foregroundColor(.black)
+                                            .fontWeight(.bold)
+                                            .frame(maxWidth: UIScreen.main.bounds.width - 40)
+                                            .cornerRadius(10)
+                                            .background(Color(red: 218/255, green: 143/255, blue: 255))
+                                        
+                                    }.cornerRadius(10)
+                                }
                                 
                             }
                                 

@@ -14,6 +14,9 @@ struct EditFlashCardSet: View {
     @State private var flashcards: [Flashcard]
     var onSave: (() -> Void)? = nil
     
+    @State private var showAlert: Bool = false
+    @State private var errorMessage: String? = nil
+    
     //@State private var errorMessage: String?
     @Environment(\.presentationMode) var presentationMode
     
@@ -51,7 +54,14 @@ struct EditFlashCardSet: View {
                 // flashcard set -- title and cards
                 FlashcardEditorView(title: $title, flashcards: $flashcards)
                 
-                // finish edit button
+                // Show error message if the flashcard set isn't valid
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                }
+                
+                // edit flashcard set
                 editButton
                 
             }.padding()
@@ -92,13 +102,21 @@ struct EditFlashCardSet: View {
                 .background(Color.gray)  // Change the divider color to red
    
             Button(action:{
-                // need to edit the umastered card list & mastsered card list too
-                viewModel.updateFlashcardSet(at: indexOfSet, newTitle: title, newFlashcards: flashcards)
-                
-                onSave?() // triggers the reloadID change
-                
-                // Dismiss the current view and go back to HomeScreen
-                presentationMode.wrappedValue.dismiss()
+                // display error if the set is missing something
+                if let error = FlashcardValidator.validateFlashcards(title: title, flashcards: flashcards) {
+                    errorMessage = error
+                }
+                // no error -- edit set and return to home screen
+                else{
+                    errorMessage = nil
+                    // edits the umastered card list & mastsered card list too
+                    viewModel.updateFlashcardSet(at: indexOfSet, newTitle: title, newFlashcards: flashcards)
+                    
+                    onSave?() // triggers the reloadID change
+                    
+                    // Dismiss the current view and go back to HomeScreen
+                    presentationMode.wrappedValue.dismiss()
+                }
             }){
                 Text("Edit Set").padding()
                     .foregroundColor(.black)

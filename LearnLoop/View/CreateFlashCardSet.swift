@@ -201,12 +201,15 @@ struct CreateFlashCardSet: View {
    
             
             Button(action:{
-                if(validateFlashcards()){
-                    // Create a new FlashCardSet and add it to the viewModel
+                // display error if the set is missing something
+                if let error = FlashcardValidator.validateFlashcards(title: title, flashcards: flashcards) {
+                    errorMessage = error
+                }
+                // no error -- create set and return to home screen
+                else {
+                    errorMessage = nil
                     let newSet = FlashCardSet(title: title, flashcards: flashcards)
                     viewModel.addFlashcardSet(newSet)
-                    
-                    // Dismiss the current view and go back to HomeScreen
                     presentationMode.wrappedValue.dismiss()
                 }
                 
@@ -219,36 +222,7 @@ struct CreateFlashCardSet: View {
 
         }
         
-    }
-    
-    
-    // validate the set before creating it
-    func validateFlashcards() -> Bool {
-        //can't have  title is empty
-        if title.isEmpty {
-            errorMessage = "The title cannot be empty."
-            return false
-        }
-        
-        // can't have less than 2 cards
-        if(flashcards.count < 2){
-            errorMessage = "Must have at least 2 flashcards in your set."
-            return false
-            
-        } else {
-            // each flashcard can't have a blank answer or question
-            for card in flashcards {
-                if card.question.isEmpty || card.answer.isEmpty {
-                    errorMessage = "All questions and answers must be filled in."
-                    return false
-                }
-            }
-        }
-        
-        errorMessage = nil // Clear error if validation passes
-        return true
-    }
-   
+    }   
     
 }
 

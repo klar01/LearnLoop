@@ -78,24 +78,17 @@ class FlashcardSetViewModel: ObservableObject {
 
     // remove flashcard set by index
     func removeFlashcardSetByIndex(index: Int){
-        // check if the index is valid
-//        if index >= 0 && index < flashcardSet.count{
-//            print("Flashcard Set removed at: \(index)")
-//            print("Flashcard Set count: \(flashcardSet.count)")
-////            flashcardSet.remove(at: index);
-//            
-//        }
         if index >= 0 && index < flashcardSet.count {
                 print("Flashcard Set removed at: \(index)")
                 flashcardSet.remove(at: index)
                 print("Flashcard Set count AFTER removal: \(flashcardSet.count)")
             } else {
-                print("❌ Index \(index) is out of bounds. Count: \(flashcardSet.count)")
+                print("Index \(index) is out of bounds. Count: \(flashcardSet.count)")
             }
     }
     
     // progress bar of mastery for a specifc flashcard set
-    func progressForMastery(for setIndex: Int) -> Float{
+    func progressForOverallMastery(for setIndex: Int) -> Float{
         return flashcardSet[setIndex].getProgressOfOverallMastery()
     }
     
@@ -113,20 +106,37 @@ class FlashcardSetViewModel: ObservableObject {
         }
         
     }
+    
+    func getMasteredSessionCards (indexOfSet: Int) -> [Flashcard]{
+        let set = flashcardSet[indexOfSet]
+        let sessionCards = set.currentSessionCards
 
-    //IN PROGRESS -- filter out the cards by their status in a batch
-    func getStudiedCards(indexOfSet: Int, status: String, mode: FlashCardSet.StudyMode) -> [Flashcard] {
-//        if(status == "Learning"){
-//            return flashcardSet[indexOfSet].unmasteredCardsArray
-//        }
-//        return flashcardSet[indexOfSet].masteredCardsArray
-        if(status == "Learning"){
-            return flashcardSet[indexOfSet].currentSessionCards.filter({ !$0.isMastered })
-        }
-        return flashcardSet[indexOfSet].currentSessionCards.filter({ $0.isMastered })
+        return sessionCards.filter { set.isMastered(id: $0.id) == true }
+    }
+    
+    func getUnmasteredSessionCards (indexOfSet: Int) -> [Flashcard]{
+        let set = flashcardSet[indexOfSet]
+        let sessionCards = set.currentSessionCards
+
+        return sessionCards.filter { set.isMastered(id: $0.id) == false }
     }
 
-    // editing the flashcard set -- add/remove/edit cards and edit title
+    //EDITED-- filter out the cards by their status
+    func getStudiedCards(indexOfSet: Int, status: String) -> [Flashcard] {
+        switch (status) {
+        // mode: unmastered cards
+        case ("Learning"):
+            return getUnmasteredSessionCards(indexOfSet: indexOfSet)
+        // mode: mastered cards
+        case ("Mastered"):
+            return getMasteredSessionCards(indexOfSet: indexOfSet)
+    
+        default:
+            return flashcardSet[indexOfSet].currentSessionCards
+        }
+    }
+
+    // ucser can edit the flashcard set -- add/remove/edit cards and edit title
     func updateFlashcardSet(at index: Int, newTitle: String, newFlashcards: [Flashcard]) {
         guard index >= 0 && index < flashcardSet.count else { return }
         
@@ -162,14 +172,37 @@ class FlashcardSetViewModel: ObservableObject {
             }
         }
         
-        // Assign title and flashcards back to the model
+        // update the (original) flashcard set
         flashcardSet[index].title = newTitle
         flashcardSet[index].flashcards = updatedFlashcards
-       
+        
+        // rebuild index map
+        flashcardSet[index].buildIndexMap()
+        
+        // rebuild session using the current mode
+        let currentMode = flashcardSet[index].currentStudyMode
+        flashcardSet[index].startStudySession(mode: currentMode)
     }
     
+    // user can choose to study the full set or unmastered cards
     func setModeSession (indexOfSet: Int, mode: FlashCardSet.StudyMode){
         flashcardSet[indexOfSet].startStudySession(mode: mode)
     }
     
+    // shows the progress of the session (full set/ unmastered set)
+    func getSessionProgress (indexOfSet: Int, mode: FlashCardSet.StudyMode) -> Float{
+        return flashcardSet[indexOfSet].getProgressForSession(mode: mode)
+    }
+
+    func getTotalSessionCards (indexOfSet: Int) -> Int{
+        return flashcardSet[indexOfSet].currentSessionCards.count
+    }
+    
+    func getTotalMasteredSessionCards(indexOfSet: Int) -> Int {
+        return getMasteredSessionCards(indexOfSet: indexOfSet).count
+    }
+    
+    func getTotalUnmasteredSessionCards(indexOfSet: Int) -> Int{
+        return getUnmasteredSessionCards(indexOfSet: indexOfSet).count
+    }
 }

@@ -37,10 +37,32 @@ struct HomeScreen: View {
                     .edgesIgnoringSafeArea(.all) // Color the entire screen
                 
                 VStack (spacing: 20){
-                    Text("What are we studying today?")
-                        .font(.title3)
-                        .foregroundColor(.white)
+    
+                    HStack{
+                        Text("What are we studying today?")
+                            .font(.title3)
+                            .foregroundColor(.white)
+                        Spacer()
+                        
+                        NavigationLink(destination: Settings()){
+                            Image(systemName: "person")
+                                .font(.system(size: 28)) // makes image bigger here
+                                .fontWeight(.black)
+                                .foregroundColor(.black)
+                                    
+                        }.frame(width: 100, height: 70)
+                            .background(.white)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.purple, lineWidth: 5) // Yellow border
+                            )
+                            .shadow(color: .purple.opacity(0.5), radius: 10, x: 0, y: 5)
+                            .padding(.trailing, -15)
+                        
+
                     
+                    }.padding(.horizontal)
                     // Search bar
                     searchBar
                     
@@ -81,7 +103,7 @@ struct HomeScreen: View {
                     }.cornerRadius(10)
                     
                     
-                }.padding()
+                }//.padding()
                 
             }
             
@@ -120,6 +142,7 @@ struct HomeScreen: View {
         .cornerRadius(10)
         .background(Color(red: 58/255, green: 58/255, blue: 60/255))
         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1))
+        .padding()
     }
     
 }

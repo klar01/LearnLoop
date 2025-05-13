@@ -20,7 +20,7 @@ struct MilestoneProgressBar: View {
                 ZStack() {
                     // bacground (uncolored progress bar)
                     ProgressView(value: progress)
-                        .progressViewStyle(LinearProgressViewStyle(tint: Color.white.opacity(0.5)))
+                        .progressViewStyle(LinearProgressViewStyle(tint: Color.pink.opacity(0.5)))
                         .frame(height: 40)
                         .cornerRadius(5)
                                         
