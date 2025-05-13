@@ -9,6 +9,12 @@ import SwiftUI
 struct LogIn: View {
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
+    @State private var isLoggedIn: Bool = false
+    
+    @StateObject private var userManager = UserManager()
+    @ObservedObject var viewModel = FlashcardSetViewModel()
     
     var body: some View {
         NavigationStack{
@@ -22,7 +28,7 @@ struct LogIn: View {
                         .fontWeight(.black)
                         .foregroundColor(Color.white)
                     
-                    Text("Welcome, let’s study hard!")
+                    Text("Welcome back!")
                         .foregroundColor(.white)
                         .padding()
                     
@@ -50,23 +56,31 @@ struct LogIn: View {
                             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1))
 
                         
-                        // Sin Up button
-                        Button(action:{
-                            // need to change the action!!!!
-                            print("LOG IN Button tapped!")
+                        // Log In button
+                        Button(action: {
+                            if userManager.login(email: email, password: password) {
+                                isLoggedIn = true
+                                print("Login successful for: \(email)")
+                            } else {
+                                alertMessage = userManager.getLoginError(email: email, password: password)
+                                showAlert = true
+                                print("Login failed for: \(email)")
+                            }
                         }) {
-                            Text("Log In")
-                                .font(.body)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding()
-                            
-                            Spacer()
-                            
-                            Image(systemName: "person")
-                                .fontWeight(.black)
-                                .foregroundColor(.white)
-                                .padding()
+                            HStack {
+                                Text("Log In")
+                                    .font(.body)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                
+                                Spacer()
+                                
+                                Image(systemName: "person")
+                                    .fontWeight(.black)
+                                    .foregroundColor(.white)
+                                    .padding()
+                            }
                         }
                         .cornerRadius(10)
                         .background(.red)
@@ -74,7 +88,7 @@ struct LogIn: View {
                     }.padding()
                     
                     
-                    // Navigate to LogIn
+                    // Navigate to SignUp
                     HStack{
                         Text("Need an account?")
                             .foregroundColor(.white)
@@ -90,10 +104,17 @@ struct LogIn: View {
                 }
                 
             }
+            .navigationDestination(isPresented: $isLoggedIn) {
+                HomeScreen(viewModel: viewModel)
+            }
+            .alert("Login Error", isPresented: $showAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(alertMessage)
+            }
             
         }.navigationBarBackButtonHidden(true)
     }
-    
     
 }
 

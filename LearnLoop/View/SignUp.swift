@@ -1,5 +1,5 @@
 //
-//  Untitled.swift
+//  SignUp.swift
 //  LearnLoop
 //
 //  Created by Klarissa Navarro on 3/30/25.
@@ -10,6 +10,12 @@ import SwiftUI
 struct SignUp: View {
     @State private var email: String = ""
     @State private var password: String = ""
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
+    @State private var isSignedUp: Bool = false
+    
+    @StateObject private var userManager = UserManager()
+    @ObservedObject var viewModel = FlashcardSetViewModel()
     
     var body: some View {
         NavigationStack{
@@ -23,7 +29,7 @@ struct SignUp: View {
                         .fontWeight(.black)
                         .foregroundColor(Color.white)
                     
-                    Text("Welcome, let’s study hard!")
+                    Text("Welcome, let's study hard!")
                         .foregroundColor(.white)
                         .padding()
                     
@@ -42,7 +48,7 @@ struct SignUp: View {
                         
                         
                         // Password input field
-                        SecureField("", text: $password, prompt: Text("Password").foregroundColor(.white)
+                        SecureField("", text: $password, prompt: Text("Password (min 6 characters)").foregroundColor(.white)
                         )
                             .padding()
                             .background(Color(red: 58/255, green: 58/255, blue: 60/255))
@@ -51,23 +57,31 @@ struct SignUp: View {
                             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1))
 
                         
-                        // Sin Up button
-                        Button(action:{
-                            // need to change the action!!!!
-                            print("SIGN UP Button tapped!")
+                        // Sign Up button
+                        Button(action: {
+                            if userManager.signUp(email: email, password: password) {
+                                isSignedUp = true
+                                print("Account created successfully for: \(email)")
+                            } else {
+                                alertMessage = userManager.getSignUpError(email: email, password: password)
+                                showAlert = true
+                                print("Signup failed: \(alertMessage)")
+                            }
                         }) {
-                            Text("Sign Up")
-                                .font(.body)
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                                .padding()
-                            
-                            Spacer()
-                            
-                            Image(systemName: "person")
-                                .fontWeight(.black)
-                                .foregroundColor(.white)
-                                .padding()
+                            HStack {
+                                Text("Sign Up")
+                                    .font(.body)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                
+                                Spacer()
+                                
+                                Image(systemName: "person")
+                                    .fontWeight(.black)
+                                    .foregroundColor(.white)
+                                    .padding()
+                            }
                         }
                         .cornerRadius(10)
                         .background(.red)
@@ -90,6 +104,14 @@ struct SignUp: View {
                     
                 }
                 
+            }
+            .navigationDestination(isPresented: $isSignedUp) {
+                HomeScreen(viewModel: viewModel)
+            }
+            .alert("Sign Up Error", isPresented: $showAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(alertMessage)
             }
             
         }.navigationBarBackButtonHidden(true)
