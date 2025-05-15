@@ -9,6 +9,17 @@ import SwiftUI
 
 struct Settings: View{
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    @StateObject private var userManager = UserManager()
+    @State private var shouldNavigateToRoot = false
+    
+    // Computed property to extract username from email
+    private var username: String {
+        let email = userManager.currentUserEmail
+        if let atIndex = email.firstIndex(of: "@") {
+            return "@" + String(email[..<atIndex])
+        }
+        return "@user"
+    }
     
     var body: some View{
         NavigationStack{
@@ -52,10 +63,10 @@ struct Settings: View{
                             .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.white, lineWidth: 1))
                         
                         VStack(spacing: 0) {
-                            //username
-                            settingDetail(mainText: "Username", secondaryText: "@john_doe")
-                            //email
-                            settingDetail(mainText: "Email",secondaryText: "jmpss@gmail.com")
+                            //username - using the extracted username from email
+                            settingDetail(mainText: "Username", secondaryText: username)
+                            //email - using the current user's email
+                            settingDetail(mainText: "Email", secondaryText: userManager.currentUserEmail)
                             // password
                             settingDetail(mainText: "Password")
                         }
@@ -70,7 +81,9 @@ struct Settings: View{
                     VStack (spacing: 20){
                         // log out
                         Button(action: {
-                            
+                            userManager.logout()
+                            // Set flag to navigate to root view
+                            shouldNavigateToRoot = true
                         }) {
                            Text("Log out")
                                 .padding()
@@ -84,7 +97,9 @@ struct Settings: View{
                         
                         // delete
                         Button(action: {
-                            
+                            userManager.deleteAccount()
+                            // Set flag to navigate to root view
+                            shouldNavigateToRoot = true
                         }) {
                            Text("Delete Account")
                                 .padding()
@@ -102,7 +117,16 @@ struct Settings: View{
 
                 }
             }
-        }.navigationBarBackButtonHidden(true)
+        }
+        .navigationBarBackButtonHidden(true)
+        .onAppear {
+            // Load the user state when the view appears
+            userManager.loadUserState()
+        }
+        // Navigate back to ContentView when shouldNavigateToRoot is true
+        .fullScreenCover(isPresented: $shouldNavigateToRoot) {
+            ContentView()
+        }
     }
     
     func settingDetail(mainText: String, secondaryText: String? = nil) -> some View {

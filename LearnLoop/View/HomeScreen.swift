@@ -107,7 +107,8 @@ struct HomeScreen: View {
                 
             }
             
-        }.navigationBarBackButtonHidden(true)
+        }
+        .navigationBarBackButtonHidden(true)
         
     }
     
@@ -150,4 +151,3 @@ struct HomeScreen: View {
 #Preview {
     HomeScreen(viewModel: FlashcardSetViewModel())
 }
-

@@ -16,6 +16,17 @@ class UserManager: ObservableObject {
     private let passwordKey = "SavedPassword"
     private let isLoggedInKey = "IsLoggedIn"
     
+    init() {
+        // Load the user state when the UserManager is initialized
+        loadUserState()
+    }
+    
+    // Load user state from UserDefaults
+    func loadUserState() {
+        isLoggedIn = userDefaults.bool(forKey: isLoggedInKey)
+        currentUserEmail = userDefaults.string(forKey: emailKey) ?? ""
+    }
+    
     // sign up function saves credentials
     func signUp(email: String, password: String) -> Bool {
         // Basic validation
@@ -56,6 +67,23 @@ class UserManager: ObservableObject {
         }
         
         return false
+    }
+    
+    // logout function
+    func logout() {
+        userDefaults.set(false, forKey: isLoggedInKey)
+        isLoggedIn = false
+        currentUserEmail = ""
+        // Note: We keep the email and password saved for potential re-login
+    }
+    
+    // delete account function
+    func deleteAccount() {
+        userDefaults.removeObject(forKey: emailKey)
+        userDefaults.removeObject(forKey: passwordKey)
+        userDefaults.removeObject(forKey: isLoggedInKey)
+        isLoggedIn = false
+        currentUserEmail = ""
     }
     
     // check if user exists

@@ -15,7 +15,7 @@ struct SignUp: View {
     @State private var isSignedUp: Bool = false
     
     @StateObject private var userManager = UserManager()
-    @ObservedObject var viewModel = FlashcardSetViewModel()
+    @ObservedObject var viewModel: FlashcardSetViewModel
     
     var body: some View {
         NavigationStack{
@@ -93,7 +93,7 @@ struct SignUp: View {
                     HStack{
                         Text("Have an account?")
                             .foregroundColor(.white)
-                        NavigationLink(destination: LogIn()) {
+                        NavigationLink(destination: LogIn(viewModel: viewModel)) {
                             Text("Log In")
                                 .foregroundColor(.white)
                                 .underline()
@@ -120,5 +120,5 @@ struct SignUp: View {
 }
 
 #Preview {
-    SignUp()
+    SignUp(viewModel: FlashcardSetViewModel())
 }
