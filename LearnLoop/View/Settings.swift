@@ -11,6 +11,7 @@ struct Settings: View{
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     @StateObject private var userManager = UserManager()
     @State private var shouldNavigateToRoot = false
+    @State private var showDeleteAlert = false
     
     // Computed property to extract username from email
     private var username: String {
@@ -97,17 +98,15 @@ struct Settings: View{
                         
                         // delete
                         Button(action: {
-                            userManager.deleteAccount()
-                            // Set flag to navigate to root view
-                            shouldNavigateToRoot = true
+                            showDeleteAlert = true
                         }) {
                            Text("Delete Account")
                                 .padding()
-                                .foregroundColor(.black)
+                                .foregroundColor(.white)
                                 .frame(maxWidth: UIScreen.main.bounds.width - 40)
                                 .fontWeight(.bold)
                                 .cornerRadius(10)
-                                .background(Color(red: 218/255, green: 143/255, blue: 255))
+                                .background(Color.red)
                         }
                         .cornerRadius(10)
                         
@@ -126,6 +125,16 @@ struct Settings: View{
         // Navigate back to ContentView when shouldNavigateToRoot is true
         .fullScreenCover(isPresented: $shouldNavigateToRoot) {
             ContentView()
+        }
+        // Delete account confirmation alert
+        .alert("Delete Account", isPresented: $showDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                userManager.deleteAccount()
+                shouldNavigateToRoot = true
+            }
+        } message: {
+            Text("Are you sure you want to delete your account? This action cannot be undone. All your flashcard sets will be permanently deleted.")
         }
     }
     

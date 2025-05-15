@@ -15,14 +15,23 @@ struct LogIn: View {
     
     @StateObject private var userManager = UserManager()
     @ObservedObject var viewModel: FlashcardSetViewModel
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
-        NavigationStack{
-            ZStack {
-                // Background Color
-                Color(red: 28/255, green: 28/255, blue: 30/255)
-                    .edgesIgnoringSafeArea(.all) // Color the entire screen
-                
+        ZStack {
+            // Background Color
+            Color(red: 28/255, green: 28/255, blue: 30/255)
+                .edgesIgnoringSafeArea(.all) // Color the entire screen
+            
+            if isLoggedIn {
+                // Show HomeScreen with sliding transition
+                HomeScreen(viewModel: viewModel)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+            } else {
+                // Login form
                 VStack{
                     Text("Log In").font(.largeTitle)
                         .fontWeight(.black)
@@ -59,7 +68,9 @@ struct LogIn: View {
                         // Log In button
                         Button(action: {
                             if userManager.login(email: email, password: password) {
-                                isLoggedIn = true
+                                withAnimation(.easeInOut(duration: 0.6)) {
+                                    isLoggedIn = true
+                                }
                                 print("Login successful for: \(email)")
                             } else {
                                 alertMessage = userManager.getLoginError(email: email, password: password)
@@ -102,18 +113,18 @@ struct LogIn: View {
                         
                     
                 }
-                
+                .transition(.asymmetric(
+                    insertion: .move(edge: .top).combined(with: .opacity),
+                    removal: .move(edge: .bottom).combined(with: .opacity)
+                ))
             }
-            .navigationDestination(isPresented: $isLoggedIn) {
-                HomeScreen(viewModel: viewModel)
-            }
-            .alert("Login Error", isPresented: $showAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(alertMessage)
-            }
-            
-        }.navigationBarBackButtonHidden(true)
+        }
+        .alert("Login Error", isPresented: $showAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
+        .navigationBarBackButtonHidden(true)
     }
     
 }

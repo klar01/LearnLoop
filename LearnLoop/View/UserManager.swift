@@ -79,15 +79,23 @@ class UserManager: ObservableObject {
     
     // delete account function
     func deleteAccount() {
+        // Remove all user data from UserDefaults
         userDefaults.removeObject(forKey: emailKey)
         userDefaults.removeObject(forKey: passwordKey)
         userDefaults.removeObject(forKey: isLoggedInKey)
+        
+        // Clear current session state
         isLoggedIn = false
         currentUserEmail = ""
+        
+        print("Account deleted successfully")
     }
     
     // check if user exists
     private func userExists(email: String) -> Bool {
+        // If no user data exists at all, return false
+        guard userDefaults.object(forKey: emailKey) != nil else { return false }
+        
         let savedEmail = userDefaults.string(forKey: emailKey) ?? ""
         return savedEmail == email
     }

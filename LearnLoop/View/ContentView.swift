@@ -19,8 +19,9 @@ struct ContentView: View {
                     .edgesIgnoringSafeArea(.all) // Color the entire screen
                 
                 if userManager.isLoggedIn {
-                    // If user is already logged in, go directly to HomeScreen
+                    // If user is already logged in, show HomeScreen with slide up transition
                     HomeScreen(viewModel: viewModel)
+                        .transition(.move(edge: .bottom).combined(with: .opacity).animation(.easeInOut(duration: 0.5)))
                 } else {
                     // If not logged in, show the welcome screen
                     VStack {
@@ -74,6 +75,7 @@ struct ContentView: View {
                         }.padding()
                        
                     }
+                    .transition(.move(edge: .top).combined(with: .opacity).animation(.easeInOut(duration: 0.5)))
                 }
             }
         }

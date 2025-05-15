@@ -16,14 +16,23 @@ struct SignUp: View {
     
     @StateObject private var userManager = UserManager()
     @ObservedObject var viewModel: FlashcardSetViewModel
+    @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
-        NavigationStack{
-            ZStack {
-                // Background Color
-                Color(red: 28/255, green: 28/255, blue: 30/255)
-                    .edgesIgnoringSafeArea(.all) // Color the entire screen
-                
+        ZStack {
+            // Background Color
+            Color(red: 28/255, green: 28/255, blue: 30/255)
+                .edgesIgnoringSafeArea(.all) // Color the entire screen
+            
+            if isSignedUp {
+                // Show HomeScreen with sliding transition
+                HomeScreen(viewModel: viewModel)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .bottom).combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)
+                    ))
+            } else {
+                // Sign up form
                 VStack{
                     Text("Sign Up").font(.largeTitle)
                         .fontWeight(.black)
@@ -60,7 +69,9 @@ struct SignUp: View {
                         // Sign Up button
                         Button(action: {
                             if userManager.signUp(email: email, password: password) {
-                                isSignedUp = true
+                                withAnimation(.easeInOut(duration: 0.6)) {
+                                    isSignedUp = true
+                                }
                                 print("Account created successfully for: \(email)")
                             } else {
                                 alertMessage = userManager.getSignUpError(email: email, password: password)
@@ -103,18 +114,18 @@ struct SignUp: View {
                         
                     
                 }
-                
+                .transition(.asymmetric(
+                    insertion: .move(edge: .top).combined(with: .opacity),
+                    removal: .move(edge: .bottom).combined(with: .opacity)
+                ))
             }
-            .navigationDestination(isPresented: $isSignedUp) {
-                HomeScreen(viewModel: viewModel)
-            }
-            .alert("Sign Up Error", isPresented: $showAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(alertMessage)
-            }
-            
-        }.navigationBarBackButtonHidden(true)
+        }
+        .alert("Sign Up Error", isPresented: $showAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
+        .navigationBarBackButtonHidden(true)
     }
     
 }
