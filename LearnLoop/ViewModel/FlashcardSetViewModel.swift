@@ -9,105 +9,134 @@ import Foundation
 
 // handle the data logic for the flashcard set
 class FlashcardSetViewModel: ObservableObject {
+    @Published var flashcardSet: [FlashCardSet] = []
+    @Published var userManager = UserManager()
     
-    // currently has dummy variables
-    @Published var flashcardSet: [FlashCardSet] = [
-        FlashCardSet(title: "rand title 1", flashcards: [
-            Flashcard(q: "some question 1: dhjnj njnj jknnj j d ds hsbh jks sd sd ds hsbh jks sd s hsbhj jks nj jks sd sd ds hsbh nj jks sd sd ds hsbh nj jks sd sd ds hsbh  sd sd ds hsbhs sd sd ds hsbh nj jks s j sh nj j sd ds hsbh jks sd sd ds hsbh jks sd s hsbhj jks nj jks sd sd ds hsbh nj jks sd sd ds hsbh nj jks sd sd ds hsbh  sd sd ds hsbhs sd sd ds hsbh nj jks s j sh nj jks sd sd ds hsbh jks sd sd ds hsbh jks sd sd ds hsbhbjhs", a: "some answer for question 1"),
-            Flashcard(q: "QUESTION 2nd", a: "some answer for question 2nd  ds hsbh jks sd sd ds hsbh jks sd s hsbhj jks nj jks sd sd ds hsbh nj jks sd sd ds hsbh nj jks sd sd ds hsbh  sd sd ds hsbhs sd sd ds hsbh nj jks s j sh nj jks sd sd d"),
-            Flashcard(q: "What is Swift?", a: "A programming language", isMastered: true),
-            Flashcard(q: "What is 2 + 2?", a: "4", isMastered: true),
-            Flashcard(q: "color of sky?", a: "blue", isMastered: true),
-            Flashcard(q: "my name?", a: "some name"),
-            Flashcard(q: "What is 10?", a: "a number"),
-            Flashcard(q: "color of grass?", a: "green"),
-            Flashcard(q: "u like jazz?", a: "no"),
-        ]),
-        FlashCardSet(title: "ANOTHER ONE", flashcards: [
-            Flashcard(q: "some question 1", a: "some answer for question 1"),
-            Flashcard(q: "some question 2nd", a: "some answer for question 2nd")
-        ])
-    ]
+    init() {
+        // Load flashcards for the current user when initialized
+        loadFlashcards()
+    }
+    
+    // Load flashcards from UserManager
+    func loadFlashcards() {
+        flashcardSet = userManager.loadFlashcards()
+        print("Loaded \(flashcardSet.count) flashcard sets from storage")
+    }
+    
+    // Save flashcards using UserManager
+    func saveFlashcards() {
+        userManager.saveFlashcards(flashcardSet)
+        print("Saved \(flashcardSet.count) flashcard sets to storage")
+    }
+    
+    // Load flashcards when user logs in
+    func loadFlashcardsForUser() {
+        flashcardSet = userManager.loadFlashcards()
+        print("Loaded flashcards for user: \(userManager.currentUserEmail)")
+    }
+    
+    // Clear flashcards when user logs out
+    func clearFlashcards() {
+        flashcardSet = []
+        print("Cleared flashcards from memory")
+    }
     
     //current card's question for a specifc flashcard set
     func currentQuestion(indexOfSet: Int) -> String {
-        if indexOfSet >= 0 && indexOfSet < flashcardSet.count {
-            if let currQuestion = flashcardSet[indexOfSet].getCurrentCard()?.question {
-                return currQuestion
-            }
-            return "Question--You're done studying!"
-            
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else {
+            return "Index out of range"
         }
-         return "Index out of range"
+        
+        if let currQuestion = flashcardSet[indexOfSet].getCurrentCard()?.question {
+            return currQuestion
+        }
+        return "Question--You're done studying!"
     }
     
     // current card's answer for a specifc flashcard set
     func currentAnswer(indexOfSet: Int) -> String {
-        if indexOfSet >= 0 && indexOfSet < flashcardSet.count {
-            if let currAnswer = flashcardSet[indexOfSet].getCurrentCard()?.answer {
-                return currAnswer
-            }
-            return "ANSWER-- You're done studying!"
-            
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else {
+            return "Index out of range"
         }
-        return "Index out of range"
+        
+        if let currAnswer = flashcardSet[indexOfSet].getCurrentCard()?.answer {
+            return currAnswer
+        }
+        return "ANSWER-- You're done studying!"
     }
     
     // get the next card within the current set, which set is found via index
     func nextCardInSet(indexOfSet: Int) {
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return }
+        
         if flashcardSet[indexOfSet].cardNumber < flashcardSet[indexOfSet].currentSessionCards.count {
             flashcardSet[indexOfSet].incrementCard()
         }
+        saveFlashcards() // Save after updating card progress
     }
     
     // assign card as mastered within the current set, which set is found via index
     func masteredCard (indexOfSet: Int){
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return }
+        
         flashcardSet[indexOfSet].markCurrentCardAsMastered()
+        saveFlashcards() // Save after marking card as mastered
     }
     
     // assign card as UNMASTERED within the current set, which set is found via index
     func unmasteredCard (indexOfSet: Int){
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return }
+        
         flashcardSet[indexOfSet].markCurrentCardAsUnmastered()
+        saveFlashcards() // Save after marking card as unmastered
     }
     
     // adding a flashcard set
     func addFlashcardSet(_ newFlashcardSet: FlashCardSet){
         flashcardSet.append(newFlashcardSet)
+        saveFlashcards() // Save after adding new set
         print("Flashcard Sets after addition: \(flashcardSet)")
     }
 
     // remove flashcard set by index
     func removeFlashcardSetByIndex(index: Int){
-        if index >= 0 && index < flashcardSet.count {
-                print("Flashcard Set removed at: \(index)")
-                flashcardSet.remove(at: index)
-                print("Flashcard Set count AFTER removal: \(flashcardSet.count)")
-            } else {
-                print("Index \(index) is out of bounds. Count: \(flashcardSet.count)")
-            }
+        guard index >= 0 && index < flashcardSet.count else {
+            print("Index \(index) is out of bounds. Count: \(flashcardSet.count)")
+            return
+        }
+        
+        print("Flashcard Set removed at: \(index)")
+        flashcardSet.remove(at: index)
+        saveFlashcards() // Save after removing set
+        print("Flashcard Set count AFTER removal: \(flashcardSet.count)")
     }
     
     // progress bar of mastery for a specifc flashcard set
     func progressForOverallMastery(for setIndex: Int) -> Float{
+        guard setIndex >= 0 && setIndex < flashcardSet.count else { return 0.0 }
         return flashcardSet[setIndex].getProgressOfOverallMastery()
     }
     
     //progress bar of how many cards the user has currently studied in set
     func progessOfCardsStudied(for setIndex: Int) -> Float{
+        guard setIndex >= 0 && setIndex < flashcardSet.count else { return 0.0 }
         return flashcardSet[setIndex].getProgressOfCardsStudiedSession()
     }
     
     //shuffle the cards within the current set, which set is found via index
     func suffleCardsInSet(indexOfSet: Int){
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return }
+        
         flashcardSet[indexOfSet].shuffleSessionCards()
         
         for flashcard in flashcardSet[indexOfSet].currentSessionCards {
             print(flashcard.question)
         }
-        
     }
     
     func getMasteredSessionCards (indexOfSet: Int) -> [Flashcard]{
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return [] }
+        
         let set = flashcardSet[indexOfSet]
         let sessionCards = set.currentSessionCards
 
@@ -115,6 +144,8 @@ class FlashcardSetViewModel: ObservableObject {
     }
     
     func getUnmasteredSessionCards (indexOfSet: Int) -> [Flashcard]{
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return [] }
+        
         let set = flashcardSet[indexOfSet]
         let sessionCards = set.currentSessionCards
 
@@ -123,6 +154,8 @@ class FlashcardSetViewModel: ObservableObject {
 
     //EDITED-- filter out the cards by their status
     func getStudiedCards(indexOfSet: Int, status: String) -> [Flashcard] {
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return [] }
+        
         switch (status) {
         // mode: unmastered cards
         case ("Learning"):
@@ -182,19 +215,24 @@ class FlashcardSetViewModel: ObservableObject {
         // rebuild session using the current mode
         let currentMode = flashcardSet[index].currentStudyMode
         flashcardSet[index].startStudySession(mode: currentMode)
+        
+        saveFlashcards() // Save after updating flashcard set
     }
     
     // user can choose to study the full set or unmastered cards
     func setModeSession (indexOfSet: Int, mode: FlashCardSet.StudyMode){
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return }
         flashcardSet[indexOfSet].startStudySession(mode: mode)
     }
     
     // shows the progress of the session (full set/ unmastered set)
     func getSessionProgress (indexOfSet: Int, mode: FlashCardSet.StudyMode) -> Float{
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return 0.0 }
         return flashcardSet[indexOfSet].getProgressForSession(mode: mode)
     }
 
     func getTotalSessionCards (indexOfSet: Int) -> Int{
+        guard indexOfSet >= 0 && indexOfSet < flashcardSet.count else { return 0 }
         return flashcardSet[indexOfSet].currentSessionCards.count
     }
     

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var userManager = UserManager()
-    @ObservedObject var viewModel = FlashcardSetViewModel()
+    @StateObject private var viewModel = FlashcardSetViewModel()
 
     var body: some View {
         NavigationView {
@@ -37,7 +37,7 @@ struct ContentView: View {
                         //button container
                         VStack (spacing: 20){
                             // LOGIN
-                            NavigationLink(destination: LogIn(viewModel: viewModel)) {
+                            NavigationLink(destination: LogIn(viewModel: viewModel, userManager: userManager)) {
                                 Text("Log In")
                                     .font(.body)
                                     .padding()
@@ -55,7 +55,7 @@ struct ContentView: View {
                        
                             
                             // SIGN UP
-                            NavigationLink(destination: SignUp(viewModel: viewModel)) {
+                            NavigationLink(destination: SignUp(viewModel: viewModel, userManager: userManager)) {
                                 Text("Sign up")
                                     .font(.body)
                                     .padding()
@@ -82,6 +82,19 @@ struct ContentView: View {
         .onAppear {
             // Load user state when the app starts
             userManager.loadUserState()
+            // Connect the userManager to the viewModel
+            viewModel.userManager = userManager
+            // Load flashcards for the current user
+            viewModel.loadFlashcardsForUser()
+        }
+        .onChange(of: userManager.isLoggedIn) { isLoggedIn in
+            if isLoggedIn {
+                // Load flashcards when user logs in
+                viewModel.loadFlashcardsForUser()
+            } else {
+                // Clear flashcards when user logs out
+                viewModel.clearFlashcards()
+            }
         }
     }
 }

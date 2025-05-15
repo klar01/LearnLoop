@@ -14,9 +14,9 @@ struct SignUp: View {
     @State private var alertMessage: String = ""
     @State private var isSignedUp: Bool = false
     
-    @StateObject private var userManager = UserManager()
     @ObservedObject var viewModel: FlashcardSetViewModel
-    @Environment(\.presentationMode) var presentationMode
+    @ObservedObject var userManager: UserManager
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         ZStack {
@@ -25,12 +25,9 @@ struct SignUp: View {
                 .edgesIgnoringSafeArea(.all) // Color the entire screen
             
             if isSignedUp {
-                // Show HomeScreen with sliding transition
+                // Show HomeScreen with sliding transition from bottom
                 HomeScreen(viewModel: viewModel)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: .bottom).combined(with: .opacity),
-                        removal: .move(edge: .top).combined(with: .opacity)
-                    ))
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
             } else {
                 // Sign up form
                 VStack{
@@ -69,6 +66,10 @@ struct SignUp: View {
                         // Sign Up button
                         Button(action: {
                             if userManager.signUp(email: email, password: password) {
+                                // Connect the userManager to the viewModel and load flashcards
+                                viewModel.userManager = userManager
+                                viewModel.loadFlashcardsForUser()
+                                
                                 withAnimation(.easeInOut(duration: 0.6)) {
                                     isSignedUp = true
                                 }
@@ -104,7 +105,7 @@ struct SignUp: View {
                     HStack{
                         Text("Have an account?")
                             .foregroundColor(.white)
-                        NavigationLink(destination: LogIn(viewModel: viewModel)) {
+                        NavigationLink(destination: LogIn(viewModel: viewModel, userManager: userManager)) {
                             Text("Log In")
                                 .foregroundColor(.white)
                                 .underline()
@@ -114,10 +115,7 @@ struct SignUp: View {
                         
                     
                 }
-                .transition(.asymmetric(
-                    insertion: .move(edge: .top).combined(with: .opacity),
-                    removal: .move(edge: .bottom).combined(with: .opacity)
-                ))
+                .transition(.opacity)
             }
         }
         .alert("Sign Up Error", isPresented: $showAlert) {
@@ -131,5 +129,5 @@ struct SignUp: View {
 }
 
 #Preview {
-    SignUp(viewModel: FlashcardSetViewModel())
+    SignUp(viewModel: FlashcardSetViewModel(), userManager: UserManager())
 }

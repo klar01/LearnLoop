@@ -44,7 +44,7 @@ struct HomeScreen: View {
                             .foregroundColor(.white)
                         Spacer()
                         
-                        NavigationLink(destination: Settings()){
+                        NavigationLink(destination: Settings(userManager: viewModel.userManager, viewModel: viewModel)){
                             Image(systemName: "person")
                                 .font(.system(size: 28)) // makes image bigger here
                                 .fontWeight(.black)

@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct Settings: View{
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    @StateObject private var userManager = UserManager()
+    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var userManager: UserManager
+    @ObservedObject var viewModel: FlashcardSetViewModel
     @State private var shouldNavigateToRoot = false
     @State private var showDeleteAlert = false
     
@@ -33,7 +34,7 @@ struct Settings: View{
                 VStack (spacing: 20){
                     HStack{
                         Button(action: {
-                            presentationMode.wrappedValue.dismiss()
+                            dismiss()
                         }) {
                             Image(systemName: "arrow.left")
                                 .padding()
@@ -83,6 +84,7 @@ struct Settings: View{
                         // log out
                         Button(action: {
                             userManager.logout()
+                            viewModel.clearFlashcards()
                             // Set flag to navigate to root view
                             shouldNavigateToRoot = true
                         }) {
@@ -131,6 +133,7 @@ struct Settings: View{
             Button("Cancel", role: .cancel) { }
             Button("Delete", role: .destructive) {
                 userManager.deleteAccount()
+                viewModel.clearFlashcards()
                 shouldNavigateToRoot = true
             }
         } message: {
@@ -168,5 +171,5 @@ struct Settings: View{
 
 
 #Preview{
-    Settings()
+    Settings(userManager: UserManager(), viewModel: FlashcardSetViewModel())
 }

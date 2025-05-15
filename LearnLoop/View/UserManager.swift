@@ -27,6 +27,36 @@ class UserManager: ObservableObject {
         currentUserEmail = userDefaults.string(forKey: emailKey) ?? ""
     }
     
+    // Get the flashcard key for the current user
+    func getFlashcardKey() -> String {
+        return "flashcards_\(currentUserEmail)"
+    }
+    
+    // Save flashcards for the current user
+    func saveFlashcards(_ flashcards: [FlashCardSet]) {
+        guard !currentUserEmail.isEmpty else { return }
+        
+        let encoder = JSONEncoder()
+        if let encoded = try? encoder.encode(flashcards) {
+            userDefaults.set(encoded, forKey: getFlashcardKey())
+            print("Saved \(flashcards.count) flashcard sets for user: \(currentUserEmail)")
+        }
+    }
+    
+    // Load flashcards for the current user
+    func loadFlashcards() -> [FlashCardSet] {
+        guard !currentUserEmail.isEmpty else { return [] }
+        
+        if let data = userDefaults.data(forKey: getFlashcardKey()) {
+            let decoder = JSONDecoder()
+            if let flashcards = try? decoder.decode([FlashCardSet].self, from: data) {
+                print("Loaded \(flashcards.count) flashcard sets for user: \(currentUserEmail)")
+                return flashcards
+            }
+        }
+        return []
+    }
+    
     // sign up function saves credentials
     func signUp(email: String, password: String) -> Bool {
         // Basic validation
@@ -47,6 +77,9 @@ class UserManager: ObservableObject {
         // update state
         isLoggedIn = true
         currentUserEmail = email
+        
+        // Initialize empty flashcards for new user
+        saveFlashcards([])
         
         return true
     }
@@ -75,10 +108,16 @@ class UserManager: ObservableObject {
         isLoggedIn = false
         currentUserEmail = ""
         // Note: We keep the email and password saved for potential re-login
+        // Flashcards remain saved for this user
     }
     
     // delete account function
     func deleteAccount() {
+        // Remove user's flashcards
+        if !currentUserEmail.isEmpty {
+            userDefaults.removeObject(forKey: getFlashcardKey())
+        }
+        
         // Remove all user data from UserDefaults
         userDefaults.removeObject(forKey: emailKey)
         userDefaults.removeObject(forKey: passwordKey)
@@ -88,7 +127,7 @@ class UserManager: ObservableObject {
         isLoggedIn = false
         currentUserEmail = ""
         
-        print("Account deleted successfully")
+        print("Account and all associated flashcards deleted successfully")
     }
     
     // check if user exists

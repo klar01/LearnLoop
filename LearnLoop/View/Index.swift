@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct Index: View {
-    @ObservedObject var viewModel = FlashcardSetViewModel()
+    @StateObject private var userManager = UserManager()
+    @StateObject private var viewModel = FlashcardSetViewModel()
     
     var body: some View {
         
@@ -32,7 +33,7 @@ struct Index: View {
                     //button container
                     VStack (spacing: 20){
                         // LOGIN
-                        NavigationLink(destination: LogIn(viewModel: viewModel)) {
+                        NavigationLink(destination: LogIn(viewModel: viewModel, userManager: userManager)) {
                             Text("Log In")
                                 .font(.body)
                                 .padding()
@@ -50,7 +51,7 @@ struct Index: View {
                    
                         
                         // SIGN UP
-                        NavigationLink(destination: SignUp(viewModel: viewModel)) {
+                        NavigationLink(destination: SignUp(viewModel: viewModel, userManager: userManager)) {
                             Text("Sign up")
                                 .font(.body)
                                 .padding()
@@ -72,6 +73,10 @@ struct Index: View {
                 }
                
             }
+        }
+        .onAppear {
+            // Connect the userManager to the viewModel
+            viewModel.userManager = userManager
         }
         
     }

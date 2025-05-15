@@ -8,8 +8,8 @@ import Foundation
 
 // NOTE:
 // Equatable will be used to compare the content of the cards easier
-// ID will be useful when editing the flashcard set: 1) keep perserve the isMastered state and 2) remove a card from masteredCardsArray if it’s deleted
-struct Flashcard: Identifiable, Equatable  {
+// ID will be useful when editing the flashcard set: 1) keep perserve the isMastered state and 2) remove a card from masteredCardsArray if it's deleted
+struct Flashcard: Identifiable, Equatable, Codable  {
     let id: UUID
     var question: String
     var answer: String

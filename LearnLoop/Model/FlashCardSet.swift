@@ -1,5 +1,5 @@
 //
-//  Untitled.swift
+//  FlashCardSet.swift
 //  LearnLoop
 //
 //  Created by Klarissa Navarro on 3/31/25.
@@ -8,8 +8,8 @@
 
 import Foundation
 
-struct FlashCardSet: Identifiable{
-    enum StudyMode {
+struct FlashCardSet: Identifiable, Codable {
+    enum StudyMode: Codable {
         case fullSet
         case unmasteredOnly
     }
@@ -31,6 +31,36 @@ struct FlashCardSet: Identifiable{
         self.buildIndexMap() //added
     }
     
+    // Custom coding keys to exclude non-persistent data
+    enum CodingKeys: String, CodingKey {
+        case id, title, flashcards
+    }
+    
+    // Custom encoder - only encode the persistent data
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(flashcards, forKey: .flashcards)
+    }
+    
+    // Custom decoder - rebuild transient data after decoding
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        flashcards = try container.decode([Flashcard].self, forKey: .flashcards)
+        
+        // Initialize transient properties
+        cardNumber = 0
+        idIndexMap = [:]
+        currentSessionCards = []
+        currentStudyMode = .fullSet
+        
+        // Rebuild the index map
+        buildIndexMap()
+    }
+    
    // array of only mastered cards
     var masteredCardsArray: [Flashcard] {
         flashcards.filter { $0.isMastered }
@@ -43,7 +73,7 @@ struct FlashCardSet: Identifiable{
     // total unmastered cards
     var unMastered: Int{
         return flashcards.filter({ !$0.isMastered }).count
-    }    
+    }
     
     // show the how much of the cards the user has mastered out of all the cards
     func getProgressOfOverallMastery() -> Float{
