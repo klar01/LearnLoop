@@ -19,16 +19,19 @@ struct SignUp: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        ZStack {
-            // Background Color
-            Color(red: 28/255, green: 28/255, blue: 30/255)
-                .edgesIgnoringSafeArea(.all) // Color the entire screen
-            
-            if isSignedUp {
-                // Show HomeScreen with sliding transition from bottom
-                HomeScreen(viewModel: viewModel)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-            } else {
+        if isSignedUp {
+            // Show HomeScreen with sliding transition from bottom
+            HomeScreen(viewModel: viewModel)
+                .transition(.asymmetric(
+                    insertion: .move(edge: .bottom),
+                    removal: .move(edge: .bottom)
+                ))
+        } else {
+            ZStack {
+                // Background Color
+                Color(red: 28/255, green: 28/255, blue: 30/255)
+                    .edgesIgnoringSafeArea(.all) // Color the entire screen
+                
                 // Sign up form
                 VStack{
                     Text("Sign Up").font(.largeTitle)
@@ -115,15 +118,15 @@ struct SignUp: View {
                         
                     
                 }
-                .transition(.opacity)
+                .transition(.identity)
             }
+            .alert("Sign Up Error", isPresented: $showAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(alertMessage)
+            }
+            .navigationBarBackButtonHidden(true)
         }
-        .alert("Sign Up Error", isPresented: $showAlert) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(alertMessage)
-        }
-        .navigationBarBackButtonHidden(true)
     }
     
 }
