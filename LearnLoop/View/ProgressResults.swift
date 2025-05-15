@@ -6,8 +6,12 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
+import ConfettiSwiftUI
 
 struct ProgressResults: View{
+    @State private var confettiCounter = 0
+    
     @ObservedObject var viewModel: FlashcardSetViewModel
     //@State var flashCardSet:
     
@@ -17,6 +21,12 @@ struct ProgressResults: View{
     var clickLearningButton: Bool = false
     
     @State private var selectedState: String = "Learning" // Track which button is selected
+    
+    var isAllMastered: Bool {
+        viewModel.getTotalMasteredSessionCards(indexOfSet: indexOfSet) == viewModel.getTotalSessionCards(indexOfSet: indexOfSet)
+    }
+    
+    
     
     var body: some View{
         NavigationView{
@@ -48,7 +58,28 @@ struct ProgressResults: View{
                             .font(.title3)
                             .foregroundColor(.white)
                         
-                    
+                        if isAllMastered {
+                            VStack {
+                                WebImage(url: URL(string: "https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2E0bG52ZmhxcHl3a2d6aWh4Y2ZvMGtldnZ4NWJ4dzBmYzU1MXIxbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/f6v1HAqfj2svgGAqh9/giphy.gif"))
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(height: 200)
+                                    .cornerRadius(15)
+                                    .padding()
+                                
+                                Text("You're officially a pro!")
+                                    .font(.title)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.yellow)
+                                    .padding(.bottom, 20)
+                            }
+                            .onAppear {
+                                confettiCounter += 1
+                            }
+                            .confettiCannon(trigger: $confettiCounter)
+                            .transition(.scale.combined(with: .opacity))
+                        }
+                        
                         HStack{
                             // Restudy all the flashcards with shuffling
                             restudyButton(

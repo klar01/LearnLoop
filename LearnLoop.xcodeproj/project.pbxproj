@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		258396242DD596DC00387A2F /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 258396232DD596DC00387A2F /* SDWebImageSwiftUI */; };
+		258396272DD597F300387A2F /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 258396262DD597F300387A2F /* ConfettiSwiftUI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C34020642D99F1A5005D4B5A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +57,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				258396272DD597F300387A2F /* ConfettiSwiftUI in Frameworks */,
+				258396242DD596DC00387A2F /* SDWebImageSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +119,8 @@
 			);
 			name = LearnLoop;
 			packageProductDependencies = (
+				258396232DD596DC00387A2F /* SDWebImageSwiftUI */,
+				258396262DD597F300387A2F /* ConfettiSwiftUI */,
 			);
 			productName = LearnLoop;
 			productReference = C34020532D99F19F005D4B5A /* LearnLoop.app */;
@@ -195,6 +204,10 @@
 			);
 			mainGroup = C340204A2D99F19F005D4B5A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				258396222DD5969B00387A2F /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				258396252DD597F300387A2F /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C34020542D99F19F005D4B5A /* Products */;
 			projectDirPath = "";
@@ -396,6 +409,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LearnLoop/Preview Content\"";
+				DEVELOPMENT_TEAM = DKRULFZMRR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -424,6 +438,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"LearnLoop/Preview Content\"";
+				DEVELOPMENT_TEAM = DKRULFZMRR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -552,6 +567,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		258396222DD5969B00387A2F /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.3;
+			};
+		};
+		258396252DD597F300387A2F /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/simibac/ConfettiSwiftUI";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		258396232DD596DC00387A2F /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 258396222DD5969B00387A2F /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+		258396262DD597F300387A2F /* ConfettiSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 258396252DD597F300387A2F /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */;
+			productName = ConfettiSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C340204B2D99F19F005D4B5A /* Project object */;
 }
